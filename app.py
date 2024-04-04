@@ -9,6 +9,9 @@ from langchain.vectorstores.chroma import Chroma
 from langchain.prompts import ChatPromptTemplate
 from langchain.chat_models import ChatOpenAI
 from datetime import datetime
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 def init_data_analysis():
     if "messages_data_analysis" not in st.session_state:
