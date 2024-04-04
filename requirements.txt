@@ -6,4 +6,4 @@ langchain
 langchain-core
 langchain-text-splitters
 chromadb
-sqlite>=3.35.0
+pysqlite3-binary
