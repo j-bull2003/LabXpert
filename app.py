@@ -158,7 +158,6 @@ def run_research_assistant_chatbot():
         
         display_messages()
 
-
     def typewriter(container, text: str, speed: int):
         """Display text with a typewriter effect, preserving newline characters."""
         lines = text.split('\n')
