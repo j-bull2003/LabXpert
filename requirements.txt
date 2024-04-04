@@ -7,3 +7,4 @@ langchain-core
 langchain-text-splitters
 chromadb
 pysqlite3-binary
+tiktoken
