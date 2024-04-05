@@ -91,21 +91,14 @@ def run_research_assistant_chatbot():
         openai_api_key = st.secrets["OPENAI_API_KEY"]
         embedding_function = CustomOpenAIEmbeddings(openai_api_key=openai_api_key)
         db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
-        
-        # Use the full chat history for context in initial queries
         chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
         prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
-        
-        # Initial search in Chroma database using the full conversation history
         results = db.similarity_search_with_relevance_scores(prompt_with_history, k=3)
         with st.spinner("Thinking..."):
             if len(results) == 0 or results[0][1] < 0.85:
-                # Generate response using the GPT model, considering the full conversation history
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
                 response_text = model.predict(prompt_with_history)
                 response = f" {response_text}"
-                
-                # Conduct a follow-up search in the Chroma database using ONLY the most recent GPT-generated response text
                 follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
                 very_strong_correlation_threshold = 0.75
                 high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
@@ -126,22 +119,16 @@ def run_research_assistant_chatbot():
                             f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
                         )
                         sources.append(source_info)
-                                    # Simplify the integration of combined texts and instructions for clarity
-                    combined_input = "\n".join(combined_texts)
-                    question_for_llm = f"Question: {prompt}"
-                    
-                    # Ensure clear instruction for the model to follow
-                    instructions_for_llm = (
-                        "Please answer the question directly, providing detailed explanations and citing relevant sections (author, year) for support. "
-                        "Quotations from sources should be enclosed in quotation marks. "
-                        "Conclude with a suggestion for a further question or experiment related to the topic, citing as (author, year)."
+                    combined_input = " ".join(combined_texts)
+                    # query_for_llm = f"{combined_input} Answer the question with citation to the paragraphs. For every sentence you write, cite the book name and paragraph number as (author, year). At the end of your commentary, suggest a further question that can be answered by the paragraphs provided."
+                    query_for_llm = (
+                        f"Answer the question with citations to each sentence:\n{combined_input}\n\n"
+                        f"Question: {prompt}\n\n"
+                        "Please answer the question directly with a lot of extra detail, citing relevant sections (author, year) for support. Everything that is taken word for word from a source should be in quotation marks."
+                        f"At the end, Suggest a further question/experiment that relates, and cite them as (author, year): {combined_input}"
                     )
-                    
-                    query_for_llm = f"{combined_input}\n\n{question_for_llm}\n\n{instructions_for_llm}"
-                    
                     integrated_response = model.predict(query_for_llm)
-
-                    sources_formatted = "\n".join(sources)
+                    sources_formatted = "\n".join(sources) 
                     citations = sources_formatted
                     
                     response = f" {integrated_response}\n"
