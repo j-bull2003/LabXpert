@@ -100,7 +100,7 @@ def run_research_assistant_chatbot():
                 response_text = model.predict(prompt_with_history)
                 response = f" {response_text}"
                 follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
-                very_strong_correlation_threshold = 0.5
+                very_strong_correlation_threshold = 0.7
                 high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
                 if high_scoring_results:
                     sources = []
