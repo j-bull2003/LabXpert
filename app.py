@@ -128,14 +128,21 @@ def run_research_assistant_chatbot():
                                 f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
                             )
                             sources.append(source_info)
-                        combined_input = " ".join(combined_texts)
-                        query_for_llm = (
-                            f"Answer the question with citations to each sentence:\n{combined_input}\n\n"
-                            f"Question: {prompt}\n\n"
-                            "Please answer the question directly with a lot of extra detail, citing relevant sections (author, year) for support. Everything that is taken word for word from a source should be in quotation marks."
-                            f"At the end, Suggest a further question/experiment that relates, and cite them as (author, year): {combined_input}"
-                        )
-                        integrated_response = model.predict(query_for_llm)
+                                        # Simplify the integration of combined texts and instructions for clarity
+                            combined_input = "\n".join(combined_texts)
+                            question_for_llm = f"Question: {prompt}"
+                            
+                            # Ensure clear instruction for the model to follow
+                            instructions_for_llm = (
+                                "Please answer the question directly, providing detailed explanations and citing relevant sections (author, year) for support. "
+                                "Quotations from sources should be enclosed in quotation marks. "
+                                "Conclude with a suggestion for a further question or experiment related to the topic, citing as (author, year)."
+                            )
+                            
+                            query_for_llm = f"{combined_input}\n\n{question_for_llm}\n\n{instructions_for_llm}"
+                            
+                            integrated_response = model.predict(query_for_llm)
+
                         sources_formatted = "\n".join(sources)
                         citations = sources_formatted
                         
