@@ -86,71 +86,39 @@ def run_research_assistant_chatbot():
         def __call__(self, input):
             return self._embed_documents(input)
 
-        def formulate_response(prompt):
-            citations = ""
-            openai_api_key = st.secrets["OPENAI_API_KEY"]
-            embedding_function = CustomOpenAIEmbeddings(openai_api_key=openai_api_key)
-            db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
-            
-            # Select only the most recent user message
-            if st.session_state.messages:
-                most_recent_user_message = next((msg["content"] for msg in reversed(st.session_state.messages) if msg["role"] == "user"), None)
-            else:
-                most_recent_user_message = ""
-            
-            prompt_with_history = f"Previous message:\n{most_recent_user_message}\n\nYour question: {prompt}" if most_recent_user_message else f"Your question: {prompt}"
-            
-            results = db.similarity_search_with_relevance_scores(prompt_with_history, k=3)
-            with st.spinner("Thinking..."):
-                if len(results) == 0 or results[0][1] < 0.85:
-                    model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-                    response_text = model.predict(prompt_with_history)
-                    response = f" {response_text}"
-                    
-                    # Conduct follow-up search using only the most recent response text
-                    follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
-                    very_strong_correlation_threshold = 0.75
-                    high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
-                    if high_scoring_results:
-                        sources = []
-                        combined_texts = []
-                        for i, (doc, _score) in enumerate(high_scoring_results):
-                            doc_content = doc.page_content
-                            first_author = doc.metadata['authors'].split(',')[0] if 'authors' in doc.metadata and doc.metadata['authors'] else "Unknown"
-                            citation_key = f"({first_author} et al., {doc.metadata.get('year', 'Unknown')})"
-                            combined_texts.append(f"{doc_content} {citation_key}")
-                            source_info = (
-                                f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
-                                f"({doc.metadata.get('year', 'Unknown')}),\n"
-                                f"\"{doc.metadata['title']}\",\n"
-                                f"PMID: {doc.metadata.get('pub_id', 'N/A')},\n"
-                                f"Available at: {doc.metadata.get('url', 'N/A')},\n"
-                                f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
-                            )
-                            sources.append(source_info)
-                                        # Simplify the integration of combined texts and instructions for clarity
-                            combined_input = "\n".join(combined_texts)
-                            question_for_llm = f"Question: {prompt}"
-                            
-                            # Ensure clear instruction for the model to follow
-                            instructions_for_llm = (
-                                "Please answer the question directly, providing detailed explanations and citing relevant sections (author, year) for support. "
-                                "Quotations from sources should be enclosed in quotation marks. "
-                                "Conclude with a suggestion for a further question or experiment related to the topic, citing as (author, year)."
-                            )
-                            
-                            query_for_llm = f"{combined_input}\n\n{question_for_llm}\n\n{instructions_for_llm}"
-                            
-                            integrated_response = model.predict(query_for_llm)
-
-                        sources_formatted = "\n".join(sources)
-                        citations = sources_formatted
-                        
-                        response = f" {integrated_response}\n"
-                else:
-                    context_texts = []
+    def formulate_response(prompt):
+        citations = ""
+        openai_api_key = st.secrets["OPENAI_API_KEY"]
+        embedding_function = CustomOpenAIEmbeddings(openai_api_key=openai_api_key)
+        db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
+        
+        # Select only the most recent user message
+        if st.session_state.messages:
+            most_recent_user_message = next((msg["content"] for msg in reversed(st.session_state.messages) if msg["role"] == "user"), None)
+        else:
+            most_recent_user_message = ""
+        
+        prompt_with_history = f"Previous message:\n{most_recent_user_message}\n\nYour question: {prompt}" if most_recent_user_message else f"Your question: {prompt}"
+        
+        results = db.similarity_search_with_relevance_scores(prompt_with_history, k=3)
+        with st.spinner("Thinking..."):
+            if len(results) == 0 or results[0][1] < 0.85:
+                model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+                response_text = model.predict(prompt_with_history)
+                response = f" {response_text}"
+                
+                # Conduct follow-up search using only the most recent response text
+                follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
+                very_strong_correlation_threshold = 0.75
+                high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
+                if high_scoring_results:
                     sources = []
-                    for doc, _score in results:
+                    combined_texts = []
+                    for i, (doc, _score) in enumerate(high_scoring_results):
+                        doc_content = doc.page_content
+                        first_author = doc.metadata['authors'].split(',')[0] if 'authors' in doc.metadata and doc.metadata['authors'] else "Unknown"
+                        citation_key = f"({first_author} et al., {doc.metadata.get('year', 'Unknown')})"
+                        combined_texts.append(f"{doc_content} {citation_key}")
                         source_info = (
                             f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
                             f"({doc.metadata.get('year', 'Unknown')}),\n"
@@ -160,21 +128,53 @@ def run_research_assistant_chatbot():
                             f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
                         )
                         sources.append(source_info)
-                    context_text = "\n\n---\n\n".join(context_texts)
-                    prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
-                    formatted_prompt = prompt_template.format(context=context_text, question=prompt_with_history)
-                    model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-                    response_text = model.predict(formatted_prompt)
-                    sources_formatted = "\n\n".join(sources)
-                    citations = sources_formatted    
-                    response = f" {response_text}\n"
+                                    # Simplify the integration of combined texts and instructions for clarity
+                        combined_input = "\n".join(combined_texts)
+                        question_for_llm = f"Question: {prompt}"
+                        
+                        # Ensure clear instruction for the model to follow
+                        instructions_for_llm = (
+                            "Please answer the question directly, providing detailed explanations and citing relevant sections (author, year) for support. "
+                            "Quotations from sources should be enclosed in quotation marks. "
+                            "Conclude with a suggestion for a further question or experiment related to the topic, citing as (author, year)."
+                        )
+                        
+                        query_for_llm = f"{combined_input}\n\n{question_for_llm}\n\n{instructions_for_llm}"
+                        
+                        integrated_response = model.predict(query_for_llm)
+
+                    sources_formatted = "\n".join(sources)
+                    citations = sources_formatted
                     
-            if citations:
-                st.session_state.messages.append({"role": "assistant", "content": response, "citations": citations})
+                    response = f" {integrated_response}\n"
             else:
-                st.session_state.messages.append({"role": "assistant", "content": response})
-            
-            display_messages()
+                context_texts = []
+                sources = []
+                for doc, _score in results:
+                    source_info = (
+                        f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
+                        f"({doc.metadata.get('year', 'Unknown')}),\n"
+                        f"\"{doc.metadata['title']}\",\n"
+                        f"PMID: {doc.metadata.get('pub_id', 'N/A')},\n"
+                        f"Available at: {doc.metadata.get('url', 'N/A')},\n"
+                        f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
+                    )
+                    sources.append(source_info)
+                context_text = "\n\n---\n\n".join(context_texts)
+                prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
+                formatted_prompt = prompt_template.format(context=context_text, question=prompt_with_history)
+                model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+                response_text = model.predict(formatted_prompt)
+                sources_formatted = "\n\n".join(sources)
+                citations = sources_formatted    
+                response = f" {response_text}\n"
+                
+        if citations:
+            st.session_state.messages.append({"role": "assistant", "content": response, "citations": citations})
+        else:
+            st.session_state.messages.append({"role": "assistant", "content": response})
+        
+        display_messages()
 
 
 
