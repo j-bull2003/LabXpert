@@ -92,25 +92,20 @@ def run_research_assistant_chatbot():
         embedding_function = CustomOpenAIEmbeddings(openai_api_key=openai_api_key)
         db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
         
-        # If there are previous messages, find the most recent user message
-        if st.session_state.messages:
-            most_recent_user_message = next((msg["content"] for msg in reversed(st.session_state.messages) if msg["role"] == "user"), None)
-        else:
-            most_recent_user_message = ""
+        # Use the full chat history for context in initial queries
+        chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
+        prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
         
-        # Combine the most recent user message with the new prompt for context
-        prompt_with_history = f"Previous message:\n{most_recent_user_message}\n\nYour question: {prompt}" if most_recent_user_message else f"Your question: {prompt}"
-        
-        # Initial search in Chroma database with the user's prompt and context
+        # Initial search in Chroma database using the full conversation history
         results = db.similarity_search_with_relevance_scores(prompt_with_history, k=3)
         with st.spinner("Thinking..."):
             if len(results) == 0 or results[0][1] < 0.85:
-                # Generate response using GPT model
+                # Generate response using the GPT model, considering the full conversation history
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
                 response_text = model.predict(prompt_with_history)
                 response = f" {response_text}"
                 
-                # Conduct a follow-up search in the Chroma database using ONLY the GPT-generated response text
+                # Conduct a follow-up search in the Chroma database using ONLY the most recent GPT-generated response text
                 follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
                 very_strong_correlation_threshold = 0.75
                 high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
