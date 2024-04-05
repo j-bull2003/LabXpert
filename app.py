@@ -109,7 +109,7 @@ def run_research_assistant_chatbot():
                 
                 # Conduct follow-up search using only the most recent response text
                 follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
-                very_strong_correlation_threshold = 0.75
+                very_strong_correlation_threshold = 0.5
                 high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
                 if high_scoring_results:
                     sources = []
