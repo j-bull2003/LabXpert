@@ -91,8 +91,15 @@ def run_research_assistant_chatbot():
         openai_api_key = st.secrets["OPENAI_API_KEY"]
         embedding_function = CustomOpenAIEmbeddings(openai_api_key=openai_api_key)
         db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
-        chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
-        prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
+        
+        # Select only the most recent user message instead of concatenating all
+        if st.session_state.messages:
+            most_recent_user_message = next((msg["content"] for msg in reversed(st.session_state.messages) if msg["role"] == "user"), None)
+        else:
+            most_recent_user_message = ""
+        
+        prompt_with_history = f"Previous message:\n{most_recent_user_message}\n\nYour question: {prompt}" if most_recent_user_message else f"Your question: {prompt}"
+        
         results = db.similarity_search_with_relevance_scores(prompt_with_history, k=3)
         with st.spinner("Thinking..."):
             if len(results) == 0 or results[0][1] < 0.85:
@@ -120,7 +127,6 @@ def run_research_assistant_chatbot():
                         )
                         sources.append(source_info)
                     combined_input = " ".join(combined_texts)
-                    # query_for_llm = f"{combined_input} Answer the question with citation to the paragraphs. For every sentence you write, cite the book name and paragraph number as (author, year). At the end of your commentary, suggest a further question that can be answered by the paragraphs provided."
                     query_for_llm = (
                         f"Answer the question with citations to each sentence:\n{combined_input}\n\n"
                         f"Question: {prompt}\n\n"
@@ -128,7 +134,7 @@ def run_research_assistant_chatbot():
                         f"At the end, Suggest a further question/experiment that relates, and cite them as (author, year): {combined_input}"
                     )
                     integrated_response = model.predict(query_for_llm)
-                    sources_formatted = "\n".join(sources) 
+                    sources_formatted = "\n".join(sources)
                     citations = sources_formatted
                     
                     response = f" {integrated_response}\n"
@@ -160,6 +166,7 @@ def run_research_assistant_chatbot():
             st.session_state.messages.append({"role": "assistant", "content": response})
         
         display_messages()
+
 
     def typewriter(container, text: str, speed: int):
         """Display text with a typewriter effect, preserving newline characters."""
