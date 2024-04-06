@@ -6,6 +6,7 @@ __pycache__/
 *.so
 .env
 chroma
+chroma1
 # Distribution / packaging
 .Python
 env/
