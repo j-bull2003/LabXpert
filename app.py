@@ -44,7 +44,7 @@ def run_research_assistant_chatbot():
     st.markdown('Your personal Data Anaylist tool ')
     st.divider()
 
-    CHROMA_PATH = "chroma3"
+    CHROMA_PATH = "chroma"
     PROMPT_TEMPLATE = """
     Answer the question based only on the following context:
 
@@ -234,7 +234,7 @@ def run_data_analysis_chatbot():
 
         def __call__(self, input):
             return self._embed_documents(input)
-    CHROMA_PATH = "chroma3"
+    CHROMA_PATH = "chroma"
     openai_api_key = st.secrets["OPENAI_API_KEY"]
     embedding_function = CustomOpenAIEmbeddings(openai_api_key=openai_api_key)
     vector_database = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
