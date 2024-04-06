@@ -1,3 +1,10 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:fea232467f9644a22b87c877218c0090bb29d990b2d3e737fc2c3b440a9136bf
-size 135
+streamlit
+python-dotenv
+openai
+langchain-community
+langchain
+langchain-core
+langchain-text-splitters
+chromadb
+pysqlite3-binary
+tiktoken
