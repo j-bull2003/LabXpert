@@ -5,7 +5,7 @@ __pycache__/
 # C extensions
 *.so
 .env
-/chroma_old_small
+chroma/
 # Distribution / packaging
 .Python
 env/
