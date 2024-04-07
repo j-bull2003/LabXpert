@@ -62,9 +62,6 @@ def run_research_assistant_chatbot():
         with shelve.open("chat_history") as db:
             return db.get("messages", [])
 
-    def save_chat_history(messages):
-        with shelve.open("chat_history") as db:
-            db["messages"] = messages
 
     if "messages" not in st.session_state:
         st.session_state.messages = load_chat_history()
@@ -373,7 +370,9 @@ def create_assistant(client):
     if user_prompt:
         st.session_state.messages.append({"role": "user", "content": user_prompt})
         formulate_response(user_prompt)
-
+    def save_chat_history(messages):
+        with shelve.open("chat_history") as db:
+            db["messages"] = messages
     save_chat_history(st.session_state.messages)
     
 def main():
