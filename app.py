@@ -128,9 +128,26 @@ def run_research_assistant_chatbot():
                         "Please answer the question directly with a lot of extra detail, citing relevant sections (author, year) for support. Everything that is taken word for word from a source should be in quotation marks."
                         f"At the end, Suggest a further question/experiment that relates, and cite them as (author, year): {combined_input}"
                     )
+                    # Querying the specific Lab.ai assistant here
+                    openai_api_key = st.secrets["OPENAI_API_KEY"]
+
                     assistant_id = "asst_HFbYDKBlJ6JRwtyS6NX1yawZ"
+
+                    def query_lab_ai_assistant(question):
+                        response = openai.ChatCompletion.create(
+                            model="gpt-3.5-turbo",
+                            messages=[
+                                {"role": "system", "content": "You are a highly knowledgeable lab assistant."},
+                                {"role": "user", "content": question},
+                            ],
+                            api_key=openai_api_key,
+                            assistant_id=assistant_id  # This assumes there's a parameter to specify assistant; if not, use the API in a way that targets your Lab.ai
+                        )
+                        return response.choices[0].message["content"]
+
+                    integrated_response = query_lab_ai_assistant(query_for_llm)
                     # integrated_response = model.predict(query_for_llm)
-                    integrated_response = assistant_id(query_for_llm)
+                    # integrated_response = assistant_id(query_for_llm)
                     # model_name = 'gpt-3.5-turbo-0125'
                     # responses = openai.Completion.create(
                     # engine=model_name, 
