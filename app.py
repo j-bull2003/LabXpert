@@ -100,6 +100,7 @@ def run_research_assistant_chatbot():
 
         def __call__(self, input):
             return self._embed_documents(input)
+        
     def formulate_response(prompt):
         citations = ""
         openai_api_key = st.secrets["OPENAI_API_KEY"]
@@ -510,16 +511,18 @@ def run_research_assistant_chatbot():
 #         main() 
 #         print(st.session_state.file_ids)
 
-# def main():
-#     st.sidebar.title("Science.ai")
-#     chatbot_mode = st.sidebar.radio("Choose an AI to assistant you:", ('Data Analysis 📊', 'Research Assistant 🔬'))
+def main():
+    st.sidebar.title("Science.ai")
+    # chatbot_mode = st.sidebar.radio("Choose an AI to assistant you:", ('Data Analysis 📊', 'Research Assistant 🔬'))
     
-#     if chatbot_mode == 'Data Analysis 📊':
-#         init_data_analysis()
-#         run_data_analysis_chatbot()
-#     elif chatbot_mode == 'Research Assistant 🔬':
-#         init_research_assistant()
-#         run_research_assistant_chatbot()
+    # if chatbot_mode == 'Data Analysis 📊':
+    #     init_data_analysis()
+    #     run_data_analysis_chatbot()
+    # elif chatbot_mode == 'Research Assistant 🔬':
+    #     init_research_assistant()
+    #     run_research_assistant_chatbot()
+    init_research_assistant()
+    run_research_assistant_chatbot()
 
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()
