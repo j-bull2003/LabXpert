@@ -64,9 +64,9 @@ def run_research_assistant_chatbot():
         
         response = openai.ChatCompletion.create(
             model="gpt-4", 
-
             temperature = 1,
             messages = [
+                {"role":"system","content" : "You are a data analyst"},
                 {"role": "user", "content": f"{prompt}"}
             ]
         )
