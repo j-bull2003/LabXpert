@@ -193,20 +193,28 @@ def run_research_assistant_chatbot():
         """
         Queries the Assistant and returns a response based on the user's prompt.
         """
-        thread_response = openai.Thread.create(
-            messages=[
-                {"role": "user", "content": user_prompt}
-            ]
-        )
         thread_id = thread_response["id"]
-        
-        run_response = openai.Thread.run(
+        thread_response = client.beta.threads.runs.create(
             thread_id=thread_id,
+            assistant_id=assistant_id,
             model="gpt-4-turbo-preview",
-            instructions="Generate a detailed analysis based on the .csv data.",
-        )
+            instructions="New instructions that override the Assistant instructions",
+            tools=[{"type": "code_interpreter"}, {"type": "retrieval"}]
+            )
+        
+        openai_api_key = st.secrets["OPENAI_API_KEY"]
+        client = OpenAI(api_key=openai_api_key)
+        assistant_id = "asst_HFbYDKBlJ6JRwtyS6NX1yawZ" 
+        run = client.beta.threads.runs.create(
+            thread_id=thread_id,
+            assistant_id=assistant_id,
+            model="gpt-4-turbo-preview",
+            instructions="New instructions that override the Assistant instructions",
+            tools=[{"type": "code_interpreter"}]
+            )
+
         # Extract and return the latest message from the Assistant as the response
-        latest_message = run_response["messages"][-1]["content"]
+        latest_message = run["messages"][-1]["content"]
         return latest_message
 
 
