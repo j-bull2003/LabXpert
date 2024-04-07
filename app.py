@@ -219,7 +219,7 @@ def run_research_assistant_chatbot():
 
 
 import io
-import openai
+from openai import OpenAI
 
 import streamlit as st
 import pandas as pd
@@ -478,7 +478,7 @@ def run_data_analysis_chatbot():
         st.divider()
         api_key = set_apikey()
         if api_key:
-            client = ChatOpenAI(api_key=api_key)
+            client = OpenAI(api_key=api_key)
             assistant_option = config(client)
             print ("Use existing assistant")
             st.session_state.current_assistant, st.session_state.model_option, st.session_state.assistant_instructions = assistant_handler(client, assistant_option)
