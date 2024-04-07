@@ -96,7 +96,7 @@ def run_research_assistant_chatbot():
         results = db.similarity_search_with_relevance_scores(prompt_with_history, k=3)
         with st.spinner("Thinking..."):
             if len(results) == 0 or results[0][1] < 0.85:
-                model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+                model = ChatOpenAI(openai_api_key=openai_api_key, assistant_name='Lab.ai')
                 # query the assistant here instead
                 response_text = model.predict(prompt_with_history)      
                 
@@ -154,7 +154,7 @@ def run_research_assistant_chatbot():
                 context_text = "\n\n---\n\n".join(context_texts)
                 prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
                 formatted_prompt = prompt_template.format(context=context_text, question=prompt_with_history)
-                model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+                model = ChatOpenAI(openai_api_key=openai_api_key, assistant_name='Lab.ai')
                 response_text = model.predict(formatted_prompt)
                 sources_formatted = "\n\n".join(sources)
                 citations = sources_formatted    
