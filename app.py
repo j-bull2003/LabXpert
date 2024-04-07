@@ -69,154 +69,161 @@ def run_research_assistant_chatbot():
     if "messages" not in st.session_state:
         st.session_state.messages = load_chat_history()
 
-    def init():
-            if "messages" not in st.session_state:
-                st.session_state.messages = []
+def init():
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
 
-            if "run" not in st.session_state:
-                st.session_state.run = None
+        if "run" not in st.session_state:
+            st.session_state.run = None
 
-            if "file_ids" not in st.session_state:
-                st.session_state.file_ids = []
-            
-            if "thread_id" not in st.session_state:
-                st.session_state.thread_id = None
-
-    def set_apikey():
-        api_key = st.secrets["OPENAI_API_KEY"]
-        return api_key
+        if "file_ids" not in st.session_state:
+            st.session_state.file_ids = []
         
+        if "thread_id" not in st.session_state:
+            st.session_state.thread_id = None
 
-    def config(client):
-        my_assistants = client.beta.assistants.list(
-            order="desc",
-            limit="20",
-        )
-        assistants = my_assistants.data
-        for assistant in assistants:
-            if assistant.name == "Lab.ai":
-                return assistant.id
-        print("Lab.ai assistant not found.")
-        return None
+def set_apikey():
+    api_key = st.secrets["OPENAI_API_KEY"]
+    return api_key
+    
+
+def config(client):
+    my_assistants = client.beta.assistants.list(
+        order="desc",
+        limit="20",
+    )
+    assistants = my_assistants.data
+    for assistant in assistants:
+        if assistant.name == "Lab.ai":
+            return assistant.id
+    print("Lab.ai assistant not found.")
+    return None
 
 
-    def upload_file(client, assistant_id, uploaded_file):
-        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-            tmp_file.write(uploaded_file.getvalue())
-            tmp_file.close()
-            with open(tmp_file.name, "rb") as f:
-                response = client.files.create(
-                file=f,
-                purpose = 'assistants'
-                )
-                print(response)
-                os.remove(tmp_file.name)
-        assistant_file = client.beta.assistants.files.create(
-            assistant_id=assistant_id,
-            file_id=response.id,
-        )
-        return assistant_file.id
-            
-    def assistant_handler(client, assistant_id):
-        def delete_file(file_id):
-            client.beta.assistants.files.delete(
-                        assistant_id=assistant_id,
-                        file_id=file_id,
-                    ) 
-
-        
-        assistant = client.beta.assistants.retrieve(assistant_id)
-        with st.sidebar:
-            # assistant_name = st.text_input("Name", value = assistant.name)
-            assistant_instructions = "You are a data analyst"
-            model_option = 'gpt-3.5-turbo-0125'
-            uploaded_file = st.file_uploader("Upload a file", type=["txt", "csv"])
-        
-            if st.button("Upload File"):
-                assistant = client.beta.assistants.update(
-                    assistant_id,
-                    instructions = assistant_instructions,
-                    name = 'Lab.ai',
-                    model = 'gpt-3.5-turbo-0125',
-
-                )   
-                if uploaded_file is not None:
-                    new_file_id = upload_file(client, assistant_id, uploaded_file)
-                    print(new_file_id)
-                    st.session_state.file_ids.append(new_file_id)
-                st.success("Assistant updated successfully")
-        return assistant, model_option, assistant_instructions
-
-    def create_assistant(client):
-        assistants_dict = {"Create Assistant": "create-assistant"}
-        assistant_name = st.text_input("Name")
-        assistant_instructions = st.text_area("Instructions")
-        model_option = st.radio("Model", ('gpt-3.5-turbo-0125'))
-        def create_new_assistant():
-            new_assistant = client.beta.assistants.create(
-                name=assistant_name,
-                instructions=assistant_instructions,
-                model=model_option,
-                tools =[
-                    {
-                        "type": "code_interpreter",
-                    }
-                ]
+def upload_file(client, assistant_id, uploaded_file):
+    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+        tmp_file.write(uploaded_file.getvalue())
+        tmp_file.close()
+        with open(tmp_file.name, "rb") as f:
+            response = client.files.create(
+            file=f,
+            purpose = 'assistants'
             )
-
-        my_assistants = client.beta.assistants.list(
-            order="desc",
-            limit="20",
-        ).data
-        assistants_dict = {"Create Assistant": "create-assistant"}
-        for assistant in my_assistants:
-            assistants_dict[assistant.name] = assistant.id
-        if assistant_name not in assistants_dict:
-            new_assistant = st.button("Create Assistant", on_click=create_new_assistant)
-            if new_assistant:
-                my_assistants = client.beta.assistants.list(
-                    order="desc",
-                    limit="20",
-                ).data
-                assistants_dict = {"Create Assistant": "create-assistant"}
-                for assistant in my_assistants:
-                    assistants_dict[assistant.name] = assistant.id
-                st.success("Assistant created successfully")
-                st.stop()
-                print(assistants_dict)
-                print("\n NEW: ", assistants_dict[assistant_name])
-                return assistants_dict[assistant_name]
-        else:
-            st.warning("Assistant name does exist in assistants_dict. Please choose another name.")
-            
-    def query_assistant(user_prompt):
-        """
-        Queries the Assistant and returns a response based on the user's prompt.
-        """
+            print(response)
+            os.remove(tmp_file.name)
+    assistant_file = client.beta.assistants.files.create(
+        assistant_id=assistant_id,
+        file_id=response.id,
+    )
+    return assistant_file.id
         
-        openai_api_key = st.secrets["OPENAI_API_KEY"]
+def assistant_handler(client, assistant_id):
+    def delete_file(file_id):
+        client.beta.assistants.files.delete(
+                    assistant_id=assistant_id,
+                    file_id=file_id,
+                ) 
+
+    
+    assistant = client.beta.assistants.retrieve(assistant_id)
+    with st.sidebar:
+        # assistant_name = st.text_input("Name", value = assistant.name)
+        assistant_instructions = "You are a data analyst"
+        model_option = 'gpt-3.5-turbo-0125'
+        uploaded_file = st.file_uploader("Upload a file", type=["txt", "csv"])
+    
+        if st.button("Upload File"):
+            assistant = client.beta.assistants.update(
+                assistant_id,
+                instructions = assistant_instructions,
+                name = 'Lab.ai',
+                model = 'gpt-3.5-turbo-0125',
+
+            )   
+            if uploaded_file is not None:
+                new_file_id = upload_file(client, assistant_id, uploaded_file)
+                print(new_file_id)
+                st.session_state.file_ids.append(new_file_id)
+            st.success("Assistant updated successfully")
+    return assistant, model_option, assistant_instructions
+
+def create_assistant(client):
+    assistants_dict = {"Create Assistant": "create-assistant"}
+    assistant_name = st.text_input("Name")
+    assistant_instructions = st.text_area("Instructions")
+    model_option = st.radio("Model", ('gpt-3.5-turbo-0125'))
+    def create_new_assistant():
+        new_assistant = client.beta.assistants.create(
+            name=assistant_name,
+            instructions=assistant_instructions,
+            model=model_option,
+            tools =[
+                {
+                    "type": "code_interpreter",
+                }
+            ]
+        )
+
+    my_assistants = client.beta.assistants.list(
+        order="desc",
+        limit="20",
+    ).data
+    assistants_dict = {"Create Assistant": "create-assistant"}
+    for assistant in my_assistants:
+        assistants_dict[assistant.name] = assistant.id
+    if assistant_name not in assistants_dict:
+        new_assistant = st.button("Create Assistant", on_click=create_new_assistant)
+        if new_assistant:
+            my_assistants = client.beta.assistants.list(
+                order="desc",
+                limit="20",
+            ).data
+            assistants_dict = {"Create Assistant": "create-assistant"}
+            for assistant in my_assistants:
+                assistants_dict[assistant.name] = assistant.id
+            st.success("Assistant created successfully")
+            st.stop()
+            print(assistants_dict)
+            print("\n NEW: ", assistants_dict[assistant_name])
+            return assistants_dict[assistant_name]
+    else:
+        st.warning("Assistant name does exist in assistants_dict. Please choose another name.")
+        
+    def query_assistant(user_prompt, assistant_id, openai_api_key):
+        """
+        Queries the OpenAI assistant within a given thread and returns the response.
+
+        Parameters:
+        - user_prompt: The user's question or prompt.
+        - assistant_id: ID of the assistant to query.
+        - thread_id: ID of the thread for the conversation.
+        - openai_api_key: The API key for authenticating with OpenAI.
+
+        Returns:
+        - The assistant's latest response to the prompt.
+        """
+        # Initialize the OpenAI client with the provided API key
         client = OpenAI(api_key=openai_api_key)
-        thread_response = client.beta.threads.runs.create(
-            thread_id=thread_id,
-            assistant_id=assistant_id,
-            model="gpt-4-turbo-preview",
-            instructions="New instructions that override the Assistant instructions",
-            tools=[{"type": "code_interpreter"}, {"type": "retrieval"}]
-            )
-        
-        assistant_id = "asst_HFbYDKBlJ6JRwtyS6NX1yawZ" 
+
+        # Create a run for the existing thread
         run_response = client.beta.threads.runs.create(
-            thread_id=thread_id,
+            thread_id=st.session_state.thread_id,
             assistant_id=assistant_id,
-            model="gpt-4-turbo-preview",
-            instructions="New instructions that override the Assistant instructions",
-            tools=[{"type": "code_interpreter"}]
-            )
-        thread_id = thread_response["id"]
-        
-        # Extract and return the latest message from the Assistant as the response
-        latest_message = run_response["messages"][-1]["content"]
-        return latest_message
+            model="gpt-3.5-turbo",  # Example model, adjust as needed
+            messages=[
+                {"role": "user", "content": user_prompt}
+            ]
+        )
+
+        # Assuming the structure of run_response to extract the assistant's latest response.
+        # Adjust this according to the actual API response structure.
+        if run_response and "data" in run_response and "messages" in run_response["data"]:
+            latest_message_content = run_response["data"]["messages"][-1]["content"]
+            return latest_message_content
+        else:
+            # Handle the case where the response does not have the expected format.
+            return "Failed to get a response from the assistant."
+
 
 
     class CustomOpenAIEmbeddings(OpenAIEmbeddings):
@@ -233,6 +240,7 @@ def run_research_assistant_chatbot():
         citations = ""
         openai_api_key = st.secrets["OPENAI_API_KEY"]
         embedding_function = CustomOpenAIEmbeddings(openai_api_key=openai_api_key)
+        CHROMA_PATH = "chroma"
         db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
         chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
         prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
@@ -246,8 +254,7 @@ def run_research_assistant_chatbot():
                 
                 # Assume `assistant_id` is obtained from your assistant creation or configuration logic
                 assistant_id = "asst_HFbYDKBlJ6JRwtyS6NX1yawZ"  # This should be dynamically retrieved based on your application's logic
-                
-                response_text = query_assistant(prompt_with_history)
+                response_text = query_assistant(prompt_with_history, assistant_id, openai_api_key)
                 # response_text = query_assistant(prompt_with_history)      
                 
 
@@ -289,7 +296,7 @@ def run_research_assistant_chatbot():
                     # Assume `assistant_id` is obtained from your assistant creation or configuration logic
                     assistant_id = "asst_HFbYDKBlJ6JRwtyS6NX1yawZ"  # This should be dynamically retrieved based on your application's logic
                     
-                    integrated_response = query_assistant(query_for_llm)
+                    integrated_response = query_assistant(query_for_llm, assistant_id, openai_api_key)
                     # integrated_response = query_assistant(query_for_llm)
                     sources_formatted = "\n".join(sources) 
                     citations = sources_formatted
