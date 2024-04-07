@@ -220,7 +220,6 @@ def run_research_assistant_chatbot():
 
 import io
 import openai
-from openai import OpenAI
 
 import streamlit as st
 import pandas as pd
