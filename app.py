@@ -12,21 +12,7 @@ from datetime import datetime
 __import__('pysqlite3')
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-def query_ai_assistant(prompt):
-    openai.api_key = st.secrets["OPENAI_API_KEY"]
-    
-    response = openai.Completion.create(
-      engine="gpt-4", 
-      prompt=prompt,
-      temperature=0.7,
-      max_tokens=150,
-      top_p=1.0,
-      frequency_penalty=0.0,
-      presence_penalty=0.0
-    )
-    
-    # return response.choices[0].text.strip()
-    return response
+
 
 def init_data_analysis():
     if "messages_data_analysis" not in st.session_state:
@@ -73,7 +59,21 @@ def run_research_assistant_chatbot():
     if "openai_model" not in st.session_state:
         st.session_state["openai_model"] = "gpt-3.5-turbo"
 
-
+    def query_ai_assistant(prompt):
+        openai.api_key = st.secrets["OPENAI_API_KEY"]
+        
+        response = openai.Completion.create(
+        engine="gpt-4", 
+        prompt=prompt,
+        temperature=0.7,
+        max_tokens=150,
+        top_p=1.0,
+        frequency_penalty=0.0,
+        presence_penalty=0.0
+        )
+        
+        # return response.choices[0].text.strip()
+        return response
     
     def load_chat_history():
         with shelve.open("chat_history") as db:
