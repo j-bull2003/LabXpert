@@ -128,7 +128,7 @@ def run_research_assistant_chatbot():
                             {"role": "system", "content": "You are a knowledgeable assistant capable of interpreting and executing code."},
                             {"role": "user", "content": question},
                         ],
-                        tools=[{"type": "code_interpreter"}],  # Adding the Code Interpreter tool
+                        # tools=[{"type": "code_interpreter"}],  # Adding the Code Interpreter tool
                     )
                     # If streaming is not needed, directly return the last message's content.
                     # Streaming responses is usually not required for synchronous requests.
