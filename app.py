@@ -98,25 +98,39 @@ def run_research_assistant_chatbot():
             if len(results) == 0 or results[0][1] < 0.85:
                 # model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
                 # response_text = model.predict(prompt_with_history)
+                
                 openai_api_key = st.secrets["OPENAI_API_KEY"]
                 client = OpenAI(api_key=openai_api_key)
                 assistant_id = "asst_HFbYDKBlJ6JRwtyS6NX1yawZ" 
-                thread = client.beta.threads.create(messages=[
-                    {"role": "user", "content": prompt_with_history}
-                ])
+                openai_api_key = st.secrets["OPENAI_API_KEY"]
+
+                # Create a Thread with the user's prompt
+                thread = client.beta.threads.create(messages=[{"role": "user", "content": prompt_with_history}])
+
+                # Execute a Run with the Assistant
                 run = client.beta.threads.runs.create(thread_id=thread.id, assistant_id=assistant_id)
-                # Assuming synchronous behavior for simplicity; implement polling in practice
-                time.sleep(2)  # Simplified waiting mechanism; adjust based on actual run times
-                # After retrieving messages from the thread
+
+                # Wait for the run to complete (simplified polling mechanism)
+                max_wait_time = 30  # Max wait time in seconds
+                wait_interval = 2  # Wait interval in seconds
+                elapsed_time = 0
+
+                while elapsed_time < max_wait_time:
+                    run_status = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
+                    if run_status['status'] == 'completed':
+                        break
+                    elif run_status['status'] in ['failed', 'cancelled']:
+                        raise Exception(f"Run did not complete successfully: {run_status['status']}")
+                    time.sleep(wait_interval)
+                    elapsed_time += wait_interval
+
+                if elapsed_time >= max_wait_time:
+                    raise Exception("Run did not complete within the maximum wait time.")
+
+                # Retrieve and process the last message
                 messages = client.beta.threads.messages.list(thread_id=thread.id)
-
-                # If messages.data is a list of objects and the last message contains the response
-                last_message = messages.data[-1]  # Get the last message
-
-                # Access the 'content' attribute of the ThreadMessage object
-                # Adjust this line according to the actual structure and attributes of the ThreadMessage class
-                response_text = last_message.content  # Use dot notation instead of ["content"]
-                # Assuming last message contains the response
+                last_message = messages.data[-1]  # Assuming this object has a 'content' attribute
+                response_text = last_message.content
                             
                 response = f" {response_text}"
                 follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
