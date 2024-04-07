@@ -13,7 +13,7 @@ __import__('pysqlite3')
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 def query_ai_assistant(prompt):
-    openai.api_key = 'your_openai_api_key_here'
+    openai.api_key = st.secrets["OPENAI_API_KEY"]
     
     response = openai.Completion.create(
       engine="text-davinci-003",  # Choose an appropriate model
