@@ -36,7 +36,7 @@ def init_research_assistant():
         st.session_state.messages_research_assistant = load_chat_history()
 
     if "openai_model" not in st.session_state:
-        st.session_state["openai_model"] = "gpt-3.5-turbo"
+        st.session_state["openai_model"] = "gpt-4"
 
 load_dotenv()
 def run_research_assistant_chatbot():
@@ -57,7 +57,7 @@ def run_research_assistant_chatbot():
     """
 
     if "openai_model" not in st.session_state:
-        st.session_state["openai_model"] = "gpt-3.5-turbo"
+        st.session_state["openai_model"] = "gpt-4"
 
 
     
