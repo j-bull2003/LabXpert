@@ -104,15 +104,10 @@ def run_research_assistant_chatbot():
                     stream = client.chat.completions.create(
                         model="gpt-3.5-turbo-0125",  # Make sure to use the correct model version you have access to
                         messages=[
-                            {"role": "system", "content": "You are a highly knowledgeable lab assistant."},
+                            {"role": "system", "content": "You are a data analyst, which can produce graphs."},
                             {"role": "user", "content": question},
                         ],
-                        stream=True,
-                        tools =[
-                            {
-                                "type": "code_interpreter",
-                            }
-                        ]
+                        stream=True
                     )
                     # Initialize an empty string to collect the streamed response
                     response_text = ""
@@ -161,15 +156,10 @@ def run_research_assistant_chatbot():
                         stream = client.chat.completions.create(
                             model="gpt-3.5-turbo-0125",  # Make sure to use the correct model version you have access to
                             messages=[
-                                {"role": "system", "content": "You are a highly knowledgeable lab assistant."},
+                                {"role": "system", "content": "You are a data analyst, which can produce graphs.."},
                                 {"role": "user", "content": question},
                             ],
-                            stream=True,
-                            tools =[
-                                {
-                                    "type": "code_interpreter",
-                                }
-                            ]
+                            stream=True
                         )
                         # Initialize an empty string to collect the streamed response
                         response_text = ""
