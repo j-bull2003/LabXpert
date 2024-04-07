@@ -105,7 +105,7 @@ def run_research_assistant_chatbot():
                     model="gpt-3.5-turbo",
                     messages=[{"role": "system", "content": "You are a knowledgeable assistant."},
                             {"role": "user", "content": prompt_with_history}],
-                    api_key=openai_api_key
+                    # api_key=openai_api_key
                 )
                 response_text = response["choices"][0]["message"]["content"]        
                 response = f" {response_text}"
