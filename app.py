@@ -16,7 +16,7 @@ def query_ai_assistant(prompt):
     openai.api_key = st.secrets["OPENAI_API_KEY"]
     
     response = openai.Completion.create(
-      engine="text-davinci-003",  # Choose an appropriate model
+      engine="gpt-4", 
       prompt=prompt,
       temperature=0.7,
       max_tokens=150,
