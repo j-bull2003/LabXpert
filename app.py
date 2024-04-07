@@ -63,14 +63,14 @@ def run_research_assistant_chatbot():
         openai.api_key = st.secrets["OPENAI_API_KEY"]
         
         response = openai.ChatCompletion.create(
-        engine="gpt-4-turbo-preview", 
-        prompt=prompt,
-        temperature=0.7,
-        max_tokens=150,
-        top_p=1.0,
-        frequency_penalty=0.0,
-        presence_penalty=0.0
-        )
+            model="gpt-4", 
+            prompt=prompt,
+            temperature=0.7,
+            max_tokens=150,
+            top_p=1.0,
+            frequency_penalty=0.0,
+            presence_penalty=0.0
+            )
         
         # return response.choices[0].text.strip()
         return response
