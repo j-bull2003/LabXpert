@@ -120,6 +120,7 @@ def run_research_assistant_chatbot():
                 #     return response_text
                 openai_api_key = st.secrets["OPENAI_API_KEY"]
                 def query_lab_ai_assistant(question, openai_api_key):
+                    client = OpenAI()
                     openai.api_key = openai_api_key  # Ensure your OpenAI API key is correctly set here
                     response = client.chat.completions.create(
                         model="gpt-3.5-turbo",
