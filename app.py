@@ -147,7 +147,27 @@ def run_research_assistant_chatbot():
                         "Please answer the question directly with a lot of extra detail, citing relevant sections (author, year) for support. Everything that is taken word for word from a source should be in quotation marks."
                         f"At the end, Suggest a further question/experiment that relates, and cite them as (author, year): {combined_input}"
                     )
-                    integrated_response = model.predict(query_for_llm)
+                    client = OpenAI()
+                    def query_lab_ai_assistant(question):
+                        stream = client.chat.completions.create(
+                            model="gpt-3.5-turbo-0125",  # Make sure to use the correct model version you have access to
+                            messages=[
+                                {"role": "system", "content": "You are a data analyst, which can produce graphs."},
+                                {"role": "user", "content": question},
+                            ],
+                            stream=True
+                        )
+                        # Initialize an empty string to collect the streamed response
+                        response_text = ""
+                        for chunk in stream:
+                            # Check if there is content to append to the response
+                            if chunk.choices[0].delta.content is not None:
+                                response_text += chunk.choices[0].delta.content
+                        return response_text
+                    integrated_response = query_lab_ai_assistant(query_for_llm)
+                    # response = f" {response_text}"
+                    
+                    # integrated_response = model.predict(query_for_llm)
                     sources_formatted = "\n".join(sources) 
                     citations = sources_formatted
                     
