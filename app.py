@@ -84,7 +84,7 @@ def run_research_assistant_chatbot():
         st.session_state.messages = load_chat_history()
 
     with st.sidebar:
-        if st.button("Delete Chat History"):
+        if st.button("Delete Chat History", key="delete_chat_history_button"):
             st.session_state.messages = []
             save_chat_history([])
 
