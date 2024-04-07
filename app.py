@@ -83,10 +83,10 @@ def run_research_assistant_chatbot():
     if "messages" not in st.session_state:
         st.session_state.messages = load_chat_history()
 
-    with st.sidebar:
-        if st.button("Delete Chat History", key="delete_chat_history_button"):
-            st.session_state.messages = []
-            save_chat_history([])
+    # with st.sidebar:
+    #     if st.button("Delete Chat History", key="delete_chat_history_button"):
+    #         st.session_state.messages = []
+    #         save_chat_history([])
 
     def init():
             if "messages" not in st.session_state:
