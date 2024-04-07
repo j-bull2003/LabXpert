@@ -83,11 +83,6 @@ def run_research_assistant_chatbot():
     if "messages" not in st.session_state:
         st.session_state.messages = load_chat_history()
 
-    # with st.sidebar:
-    #     if st.button("Delete Chat History", key="delete_chat_history_button"):
-    #         st.session_state.messages = []
-    #         save_chat_history([])
-
     def init():
             if "messages" not in st.session_state:
                 st.session_state.messages = []
@@ -102,10 +97,6 @@ def run_research_assistant_chatbot():
                 st.session_state.thread_id = None
 
     def set_apikey():
-        # st.sidebar.header('Your personal Scientific Data Analyst')
-        # st.sidebar.markdown('This AI Lab Assistant is design to analyse scientific data.')
-        # st.sidebar.header('Configure')
-        # api_key = st.sidebar.text_input("Enter your OpenAI API key", type="password")
         api_key = st.secrets["OPENAI_API_KEY"]
         return api_key
         
@@ -212,8 +203,8 @@ def run_research_assistant_chatbot():
         else:
             st.warning("Assistant name does exist in assistants_dict. Please choose another name.")
       
-    def chat_prompt(client, assistant_option):
-        if prompt := st.chat_input("Enter your message here"):
+    def chat_prompt(client, prompt):
+        # if prompt := st.chat_input("Enter your message here"):
             # Append the user's message to the chat history for later display
             user_message = client.beta.threads.messages.create(
                 thread_id=st.session_state.thread_id,
@@ -262,67 +253,6 @@ def run_research_assistant_chatbot():
                 st.empty()
             
 
-    # def chat_display(client):
-    #     st.session_state.messages = client.beta.threads.messages.list(
-    #         thread_id=st.session_state.thread_id
-    #     ).data
-
-    #     for message in reversed(st.session_state.messages):
-    #         if message.role in ["user", "assistant"]:
-    #             # Define the avatar based on the message role
-    #             avatar = "🧬" if message.role == "user" else "🤖"
-    #             for content in message.content:
-    #                 if content.type == "text":
-    #                     # Prepend the avatar to the text content
-    #                     text_with_avatar = f"{avatar} {content.text.value}"
-    #                     # Prepend the avatar to the text content
-
-    #                     container = st.empty()
-    #                     # Corrected: Pass the 'text_with_avatar' variable directly
-    #                     st.markdown(text_with_avatar)
-
-    #                     container = st.empty()
-    #                     # typewriter(container, text_with_avatar, speed=50)  # Adjust the speed as needed
-    #                 elif content.type == "image_file":
-    #                     # Image files are handled normally, as before
-    #                     image_file = content.image_file.file_id
-    #                     image_data = client.files.content(image_file)
-    #                     image_data = image_data.read()
-    #                     # Save image to temp file
-    #                     temp_file = tempfile.NamedTemporaryFile(delete=False)
-    #                     temp_file.write(image_data)
-    #                     temp_file.close()
-    #                     # Display image
-    #                     image = Image.open(temp_file.name)
-    #                     st.image(image)
-    #                 else:
-    #                     # For other content types, display them directly
-    #                     st.markdown(content)
-                        
-    #         def main():
-    #             st.caption('Analyse your experimental data')
-    #             st.markdown('Your personal Data Anaylist tool ')
-    #             st.divider()
-    #             api_key = set_apikey()
-    #             if api_key:
-    #                 client = OpenAI(api_key=api_key)
-    #                 assistant_option = config(client)
-    #                 print ("Use existing assistant")
-    #                 st.session_state.current_assistant, st.session_state.model_option, st.session_state.assistant_instructions = assistant_handler(client, assistant_option)
-    #                 if st.session_state.thread_id is None:
-    #                     st.session_state.thread_id = client.beta.threads.create().id
-    #                     print(st.session_state.thread_id)
-    #                 chat_prompt(client, assistant_option)
-                    
-    #             else:
-    #                 st.warning("Please enter your OpenAI API key")
-                        
-
-
-    #         if __name__ == '__main__':
-    #             init()
-    #             main() 
-    #             print(st.session_state.file_ids)
 
     class CustomOpenAIEmbeddings(OpenAIEmbeddings):
         def __init__(self, openai_api_key, *args, **kwargs):
@@ -454,285 +384,16 @@ def run_research_assistant_chatbot():
                     st.markdown(message["citations"], unsafe_allow_html=True)
 
 
-    # user_prompt = st.chat_input("How can I help?")
+    user_prompt = st.chat_input("How can I help?")
 
-    # if user_prompt:
-    #     st.session_state.messages.append({"role": "user", "content": user_prompt})
-    #     formulate_response(user_prompt)
+    if user_prompt:
+        st.session_state.messages.append({"role": "user", "content": user_prompt})
+        formulate_response(user_prompt)
 
     save_chat_history(st.session_state.messages)
     
 def main():
     st.sidebar.title("Science.ai")
-    init_research_assistant()
-    run_research_assistant_chatbot()
-
-if __name__ == '__main__':
-    main()
-
-# def run_data_analysis_chatbot():
-#     st.title("Lab Assistant 📊")
-    # class CustomOpenAIEmbeddings(OpenAIEmbeddings):
-    #     def __init__(self, openai_api_key, *args, **kwargs):
-    #         super().__init__(openai_api_key=openai_api_key, *args, **kwargs)
-            
-    #     def _embed_documents(self, texts):
-    #         return super().embed_documents(texts)
-
-    #     def __call__(self, input):
-    #         return self._embed_documents(input)
-    # CHROMA_PATH = "chroma"
-    # openai_api_key = st.secrets["OPENAI_API_KEY"]
-    # embedding_function = CustomOpenAIEmbeddings(openai_api_key=openai_api_key)
-    # vector_database = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
-    
-    # def init():
-    #     if "messages" not in st.session_state:
-    #         st.session_state.messages = []
-
-    #     if "run" not in st.session_state:
-    #         st.session_state.run = None
-
-    #     if "file_ids" not in st.session_state:
-    #         st.session_state.file_ids = []
-        
-    #     if "thread_id" not in st.session_state:
-    #         st.session_state.thread_id = None
-
-    # def set_apikey():
-    #     # st.sidebar.header('Your personal Scientific Data Analyst')
-    #     # st.sidebar.markdown('This AI Lab Assistant is design to analyse scientific data.')
-    #     # st.sidebar.header('Configure')
-    #     # api_key = st.sidebar.text_input("Enter your OpenAI API key", type="password")
-    #     api_key = st.secrets["OPENAI_API_KEY"]
-    #     return api_key
-        
-
-    # def config(client):
-    #     my_assistants = client.beta.assistants.list(
-    #         order="desc",
-    #         limit="20",
-    #     )
-    #     assistants = my_assistants.data
-    #     for assistant in assistants:
-    #         if assistant.name == "Lab.ai":
-    #             return assistant.id
-    #     print("Lab.ai assistant not found.")
-    #     return None
-
-
-    # def upload_file(client, assistant_id, uploaded_file):
-    #     with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-    #         tmp_file.write(uploaded_file.getvalue())
-    #         tmp_file.close()
-    #         with open(tmp_file.name, "rb") as f:
-    #             response = client.files.create(
-    #             file=f,
-    #             purpose = 'assistants'
-    #             )
-    #             print(response)
-    #             os.remove(tmp_file.name)
-    #     assistant_file = client.beta.assistants.files.create(
-    #         assistant_id=assistant_id,
-    #         file_id=response.id,
-    #     )
-    #     return assistant_file.id
-            
-    # def assistant_handler(client, assistant_id):
-    #     def delete_file(file_id):
-    #         client.beta.assistants.files.delete(
-    #                     assistant_id=assistant_id,
-    #                     file_id=file_id,
-    #                 ) 
-
-        
-    #     assistant = client.beta.assistants.retrieve(assistant_id)
-    #     with st.sidebar:
-    #         # assistant_name = st.text_input("Name", value = assistant.name)
-    #         assistant_instructions = "You are a data analyst"
-    #         model_option = 'gpt-3.5-turbo-0125'
-    #         uploaded_file = st.file_uploader("Upload a file", type=["txt", "csv"])
-        
-    #         if st.button("Upload File"):
-    #             assistant = client.beta.assistants.update(
-    #                 assistant_id,
-    #                 instructions = assistant_instructions,
-    #                 name = 'Lab.ai',
-    #                 model = 'gpt-3.5-turbo-0125',
-
-    #             )   
-    #             if uploaded_file is not None:
-    #                 new_file_id = upload_file(client, assistant_id, uploaded_file)
-    #                 print(new_file_id)
-    #                 st.session_state.file_ids.append(new_file_id)
-    #             st.success("Assistant updated successfully")
-    #     return assistant, model_option, assistant_instructions
-
-    # def create_assistant(client):
-    #     assistants_dict = {"Create Assistant": "create-assistant"}
-    #     assistant_name = st.text_input("Name")
-    #     assistant_instructions = st.text_area("Instructions")
-    #     model_option = st.radio("Model", ('gpt-3.5-turbo-0125'))
-    #     def create_new_assistant():
-    #         new_assistant = client.beta.assistants.create(
-    #             name=assistant_name,
-    #             instructions=assistant_instructions,
-    #             model=model_option,
-    #             tools =[
-    #                 {
-    #                     "type": "code_interpreter",
-    #                 }
-    #             ]
-    #         )
-
-    #     my_assistants = client.beta.assistants.list(
-    #         order="desc",
-    #         limit="20",
-    #     ).data
-    #     assistants_dict = {"Create Assistant": "create-assistant"}
-    #     for assistant in my_assistants:
-    #         assistants_dict[assistant.name] = assistant.id
-    #     if assistant_name not in assistants_dict:
-    #         new_assistant = st.button("Create Assistant", on_click=create_new_assistant)
-    #         if new_assistant:
-    #             my_assistants = client.beta.assistants.list(
-    #                 order="desc",
-    #                 limit="20",
-    #             ).data
-    #             assistants_dict = {"Create Assistant": "create-assistant"}
-    #             for assistant in my_assistants:
-    #                 assistants_dict[assistant.name] = assistant.id
-    #             st.success("Assistant created successfully")
-    #             st.stop()
-    #             print(assistants_dict)
-    #             print("\n NEW: ", assistants_dict[assistant_name])
-    #             return assistants_dict[assistant_name]
-    #     else:
-    #         st.warning("Assistant name does exist in assistants_dict. Please choose another name.")
-      
-    # def chat_prompt(client, assistant_option):
-    #     if prompt := st.chat_input("Enter your message here"):
-    #         # Append the user's message to the chat history for later display
-    #         user_message = client.beta.threads.messages.create(
-    #             thread_id=st.session_state.thread_id,
-    #             role="user",
-    #             content=prompt,
-    #         )
-
-    #         # Ensure the messages list is updated correctly
-    #         if st.session_state.messages is None:
-    #             st.session_state.messages = [user_message]
-    #         else:
-    #             st.session_state.messages.append(user_message)
-
-    #         # Updating the assistant's configuration
-    #         st.session_state.current_assistant = client.beta.assistants.update(
-    #             st.session_state.current_assistant.id,
-    #             instructions=st.session_state.assistant_instructions,
-    #             name=st.session_state.current_assistant.name,
-    #             tools=st.session_state.current_assistant.tools,
-    #             model=st.session_state.model_option,
-    #             file_ids=st.session_state.file_ids,
-    #         )
-
-    #         # Processing the prompt
-    #         st.session_state.run = client.beta.threads.runs.create(
-    #             thread_id=st.session_state.thread_id,
-    #             assistant_id=assistant_option,
-    #             tools=[{"type": "code_interpreter"}],
-    #         )
-
-    #         pending = False
-    #         while st.session_state.run.status != "completed":
-    #             with st.spinner("Thinking..."):
-    #                 if not pending:
-    #                     # Show a temporary message while the assistant is processing
-    #                     # with st.chat_message("assistant"):
-    #                     #     st.markdown("Lab.ai is thinking...")
-    #                         pending = True
-    #                 time.sleep(3)
-    #                 st.session_state.run = client.beta.threads.runs.retrieve(
-    #                     thread_id=st.session_state.thread_id,
-    #                     run_id=st.session_state.run.id,
-    #                 )
-
-    #         if st.session_state.run.status == "completed":
-    #             st.empty()
-    #             chat_display(client)
-            
-
-    # def chat_display(client):
-    #     st.session_state.messages = client.beta.threads.messages.list(
-    #         thread_id=st.session_state.thread_id
-    #     ).data
-
-    #     for message in reversed(st.session_state.messages):
-    #         if message.role in ["user", "assistant"]:
-    #             # Define the avatar based on the message role
-    #             avatar = "🧬" if message.role == "user" else "🤖"
-    #             for content in message.content:
-    #                 if content.type == "text":
-    #                     # Prepend the avatar to the text content
-    #                     text_with_avatar = f"{avatar} {content.text.value}"
-    #                     # Prepend the avatar to the text content
-
-    #                     container = st.empty()
-    #                     # Corrected: Pass the 'text_with_avatar' variable directly
-    #                     st.markdown(text_with_avatar)
-
-    #                     container = st.empty()
-    #                     # typewriter(container, text_with_avatar, speed=50)  # Adjust the speed as needed
-    #                 elif content.type == "image_file":
-    #                     # Image files are handled normally, as before
-    #                     image_file = content.image_file.file_id
-    #                     image_data = client.files.content(image_file)
-    #                     image_data = image_data.read()
-    #                     # Save image to temp file
-    #                     temp_file = tempfile.NamedTemporaryFile(delete=False)
-    #                     temp_file.write(image_data)
-    #                     temp_file.close()
-    #                     # Display image
-    #                     image = Image.open(temp_file.name)
-    #                     st.image(image)
-    #                 else:
-    #                     # For other content types, display them directly
-    #                     st.markdown(content)
-
-#     def main():
-#         st.caption('Analyse your experimental data')
-#         st.markdown('Your personal Data Anaylist tool ')
-#         st.divider()
-#         api_key = set_apikey()
-#         if api_key:
-#             client = OpenAI(api_key=api_key)
-#             assistant_option = config(client)
-#             print ("Use existing assistant")
-#             st.session_state.current_assistant, st.session_state.model_option, st.session_state.assistant_instructions = assistant_handler(client, assistant_option)
-#             if st.session_state.thread_id is None:
-#                 st.session_state.thread_id = client.beta.threads.create().id
-#                 print(st.session_state.thread_id)
-#             chat_prompt(client, assistant_option)
-            
-#         else:
-#             st.warning("Please enter your OpenAI API key")
-                
-
-
-#     if __name__ == '__main__':
-#         init()
-#         main() 
-#         print(st.session_state.file_ids)
-
-def main():
-    st.sidebar.title("Science.ai")
-    # chatbot_mode = st.sidebar.radio("Choose an AI to assistant you:", ('Data Analysis 📊', 'Research Assistant 🔬'))
-    
-    # if chatbot_mode == 'Data Analysis 📊':
-    #     init_data_analysis()
-    #     run_data_analysis_chatbot()
-    # elif chatbot_mode == 'Research Assistant 🔬':
-    #     init_research_assistant()
-    #     run_research_assistant_chatbot()
     init_research_assistant()
     run_research_assistant_chatbot()
 
