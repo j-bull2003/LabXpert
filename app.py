@@ -96,8 +96,20 @@ def run_research_assistant_chatbot():
         results = db.similarity_search_with_relevance_scores(prompt_with_history, k=3)
         with st.spinner("Thinking..."):
             if len(results) == 0 or results[0][1] < 0.85:
-                model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-                response_text = model.predict(prompt_with_history)
+                # model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+                # response_text = model.predict(prompt_with_history)
+                openai_api_key = st.secrets["OPENAI_API_KEY"]
+                client = OpenAI(api_key=openai_api_key)
+                assistant_id = "your-assistant-id" 
+                thread = client.beta.threads.create(messages=[
+                    {"role": "user", "content": prompt_with_history}
+                ])
+                run = client.beta.threads.runs.create(thread_id=thread.id, assistant_id=assistant_id)
+                # Assuming synchronous behavior for simplicity; implement polling in practice
+                time.sleep(2)  # Simplified waiting mechanism; adjust based on actual run times
+                messages = client.beta.threads.messages.list(thread_id=thread.id)
+                response_text = messages.data[-1]["content"]  # Assuming last message contains the response
+            
                 response = f" {response_text}"
                 follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
                 very_strong_correlation_threshold = 0.7
@@ -128,14 +140,6 @@ def run_research_assistant_chatbot():
                         f"At the end, Suggest a further question/experiment that relates, and cite them as (author, year): {combined_input}"
                     )
                     integrated_response = model.predict(query_for_llm)
-                    # integrated_response = assistant_id(query_for_llm)
-                    # model_name = 'gpt-3.5-turbo-0125'
-                    # responses = openai.Completion.create(
-                    # engine=model_name, 
-                    # prompt=query_for_llm,
-                    # max_tokens=100
-                    # )
-                    # integrated_response = responses.choices[0].text.strip()
                     sources_formatted = "\n".join(sources) 
                     citations = sources_formatted
                     
