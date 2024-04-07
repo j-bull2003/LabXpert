@@ -1,4 +1,5 @@
 import openai
+from openai import ChatCompletion
 import time
 import streamlit as st
 from dotenv import load_dotenv
@@ -97,46 +98,17 @@ def run_research_assistant_chatbot():
         with st.spinner("Thinking..."):
             if len(results) == 0 or results[0][1] < 0.85:
                 # model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+                # # query the assistant herre instead
                 # response_text = model.predict(prompt_with_history)
                 
-                openai_api_key = st.secrets["OPENAI_API_KEY"]
-                client = OpenAI(api_key=openai_api_key)
-                assistant_id = "asst_HFbYDKBlJ6JRwtyS6NX1yawZ" 
-                openai_api_key = st.secrets["OPENAI_API_KEY"]
-
-                # Create a Thread with the user's prompt
-                thread = client.beta.threads.create(messages=[{"role": "user", "content": prompt_with_history}])
-
-                # Execute a Run with the Assistant
-                run = client.beta.threads.runs.create(thread_id=thread.id, assistant_id=assistant_id)
-
-                # Wait for the run to complete (simplified polling mechanism)
-                max_wait_time = 30  # Max wait time in seconds
-                wait_interval = 2  # Wait interval in seconds
-                elapsed_time = 0
-
-                while elapsed_time < max_wait_time:
-                    # Retrieve the Run object again to get its latest status
-                    run_status = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
-                    
-                    # Use dot notation to access the 'status' attribute of the Run object
-                    if run_status.status == 'completed':
-                        break
-                    elif run_status.status in ['failed', 'cancelled']:
-                        raise Exception(f"Run did not complete successfully: {run_status.status}")
-                    time.sleep(wait_interval)
-                    elapsed_time += wait_interval
-
-
-                if elapsed_time >= max_wait_time:
-                    raise Exception("Run did not complete within the maximum wait time.")
-
-                # Retrieve and process the last message
-                messages = client.beta.threads.messages.list(thread_id=thread.id)
-                last_message = messages.data[-1]  # Assuming this object has a 'content' attribute
-                response_text = last_message.content
-                            
-                response = f" {str(response_text)}"
+                response = ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[{"role": "system", "content": "You are a knowledgeable assistant."},
+                            {"role": "user", "content": prompt_with_history}],
+                    api_key=openai_api_key
+                )
+                response_text = response["choices"][0]["message"]["content"]        
+                response = f" {response_text}"
                 follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
                 very_strong_correlation_threshold = 0.7
                 high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
