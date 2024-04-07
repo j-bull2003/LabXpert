@@ -133,18 +133,23 @@ def run_research_assistant_chatbot():
 
                     assistant_id = "asst_HFbYDKBlJ6JRwtyS6NX1yawZ"
                     client = OpenAI()
+
                     def query_lab_ai_assistant(question):
-                        response = client.chat.completions.create(
-                            model="gpt-3.5-turbo",
+                        stream = client.chat.completions.create(
+                            model="gpt-4",  # Make sure to use the correct model version you have access to
                             messages=[
                                 {"role": "system", "content": "You are a highly knowledgeable lab assistant."},
                                 {"role": "user", "content": question},
                             ],
-                            api_key=openai_api_key,
-                            assistant_id=assistant_id,
-                            stream=True
+                            stream=True,
                         )
-                        return response.choices[0].message["content"]
+                        # Initialize an empty string to collect the streamed response
+                        response_text = ""
+                        for chunk in stream:
+                            # Check if there is content to append to the response
+                            if chunk.choices[0].delta.content is not None:
+                                response_text += chunk.choices[0].delta.content
+                        return response_text
 
                     integrated_response = query_lab_ai_assistant(query_for_llm)
                     # integrated_response = model.predict(query_for_llm)
