@@ -136,7 +136,7 @@ def run_research_assistant_chatbot():
 
                     def query_lab_ai_assistant(question):
                         stream = client.chat.completions.create(
-                            model="gpt-4",  # Make sure to use the correct model version you have access to
+                            model="gpt-3.5-turbo-0125",  # Make sure to use the correct model version you have access to
                             messages=[
                                 {"role": "system", "content": "You are a highly knowledgeable lab assistant."},
                                 {"role": "user", "content": question},
