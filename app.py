@@ -100,7 +100,7 @@ def run_research_assistant_chatbot():
                 # response_text = model.predict(prompt_with_history)
                 openai_api_key = st.secrets["OPENAI_API_KEY"]
                 client = OpenAI(api_key=openai_api_key)
-                assistant_id = "your-assistant-id" 
+                assistant_id = "asst_HFbYDKBlJ6JRwtyS6NX1yawZ" 
                 thread = client.beta.threads.create(messages=[
                     {"role": "user", "content": prompt_with_history}
                 ])
