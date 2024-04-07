@@ -24,20 +24,6 @@ import requests
 import csv
 import json
 from PIL import Image
-
-
-def init_data_analysis():
-    if "messages_data_analysis" not in st.session_state:
-        st.session_state.messages_data_analysis = []
-
-    if "run_data_analysis" not in st.session_state:
-        st.session_state.run_data_analysis = None
-
-    if "file_ids_data_analysis" not in st.session_state:
-        st.session_state.file_ids_data_analysis = []
-    
-    if "thread_id_data_analysis" not in st.session_state:
-        st.session_state.thread_id_data_analysis = None
         
 def load_chat_history():
     with shelve.open("chat_history") as db:
@@ -202,57 +188,22 @@ def run_research_assistant_chatbot():
                 return assistants_dict[assistant_name]
         else:
             st.warning("Assistant name does exist in assistants_dict. Please choose another name.")
-      
-    def chat_prompt(client, prompt):
-        # if prompt := st.chat_input("Enter your message here"):
-            # Append the user's message to the chat history for later display
-            user_message = client.beta.threads.messages.create(
-                thread_id=st.session_state.thread_id,
-                role="user",
-                content=prompt,
-            )
-
-            # Ensure the messages list is updated correctly
-            if st.session_state.messages is None:
-                st.session_state.messages = [user_message]
-            else:
-                st.session_state.messages.append(user_message)
-
-            # Updating the assistant's configuration
-            st.session_state.current_assistant = client.beta.assistants.update(
-                st.session_state.current_assistant.id,
-                instructions=st.session_state.assistant_instructions,
-                name=st.session_state.current_assistant.name,
-                tools=st.session_state.current_assistant.tools,
-                model=st.session_state.model_option,
-                file_ids=st.session_state.file_ids,
-            )
-
-            # Processing the prompt
-            st.session_state.run = client.beta.threads.runs.create(
-                thread_id=st.session_state.thread_id,
-                assistant_id=assistant_option,
-                tools=[{"type": "code_interpreter"}],
-            )
-
-            pending = False
-            while st.session_state.run.status != "completed":
-                with st.spinner("Thinking..."):
-                    if not pending:
-                        # Show a temporary message while the assistant is processing
-                        # with st.chat_message("assistant"):
-                        #     st.markdown("Lab.ai is thinking...")
-                            pending = True
-                    time.sleep(3)
-                    st.session_state.run = client.beta.threads.runs.retrieve(
-                        thread_id=st.session_state.thread_id,
-                        run_id=st.session_state.run.id,
-                    )
-
-            if st.session_state.run.status == "completed":
-                st.empty()
             
+    def query_assistant(client, assistant_id, user_prompt):
+        """
+        Queries an OpenAI Assistant with a given user prompt and returns the assistant's response.
 
+        :param client: The OpenAI API client instance.
+        :param assistant_id: The ID of the assistant to query.
+        :param user_prompt: The prompt or question from the user.
+        :return: The assistant's response text.
+        """
+        try:
+            response = client.beta.assistants.chat(assistant_id, messages=[{"role": "system", "content": "You are a research assistant."}, {"role": "user", "content": user_prompt}])
+            return response.choices[0].message['content']
+        except Exception as e:
+            print(f"Error querying assistant: {e}")
+            return "I'm sorry, I encountered an issue processing your request."
 
     class CustomOpenAIEmbeddings(OpenAIEmbeddings):
         def __init__(self, openai_api_key, *args, **kwargs):
@@ -277,7 +228,13 @@ def run_research_assistant_chatbot():
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name='gpt-4')
                 # query the assistant here instead
                 client = OpenAI(api_key=openai_api_key)
-                response_text = chat_prompt(client, prompt_with_history)      
+                openai_api_key = st.secrets["OPENAI_API_KEY"]
+                
+                # Assume `assistant_id` is obtained from your assistant creation or configuration logic
+                assistant_id = "asst_HFbYDKBlJ6JRwtyS6NX1yawZ"  # This should be dynamically retrieved based on your application's logic
+                
+                response_text = query_assistant(client, assistant_id, prompt_with_history)
+                # response_text = query_assistant(prompt_with_history)      
                 
 
                 response = f" {response_text}"
@@ -312,8 +269,14 @@ def run_research_assistant_chatbot():
                     )
 
                     response = f" {response_text}"
-                    client = OpenAI(api_key=openai_api_key) 
-                    integrated_response = chat_prompt(client, query_for_llm)
+                    client = OpenAI(api_key=openai_api_key)
+                    openai_api_key = st.secrets["OPENAI_API_KEY"]
+                    
+                    # Assume `assistant_id` is obtained from your assistant creation or configuration logic
+                    assistant_id = "asst_HFbYDKBlJ6JRwtyS6NX1yawZ"  # This should be dynamically retrieved based on your application's logic
+                    
+                    integrated_response = query_assistant(client, assistant_id, query_for_llm)
+                    # integrated_response = query_assistant(query_for_llm)
                     sources_formatted = "\n".join(sources) 
                     citations = sources_formatted
                     
