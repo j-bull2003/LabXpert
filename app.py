@@ -128,7 +128,9 @@ def run_research_assistant_chatbot():
                         "Please answer the question directly with a lot of extra detail, citing relevant sections (author, year) for support. Everything that is taken word for word from a source should be in quotation marks."
                         f"At the end, Suggest a further question/experiment that relates, and cite them as (author, year): {combined_input}"
                     )
-                    integrated_response = model.predict(query_for_llm)
+                    assistant_id = "asst_HFbYDKBlJ6JRwtyS6NX1yawZ"
+                    # integrated_response = model.predict(query_for_llm)
+                    integrated_response = assistant_id(query_for_llm)
                     # model_name = 'gpt-3.5-turbo-0125'
                     # responses = openai.Completion.create(
                     # engine=model_name, 
