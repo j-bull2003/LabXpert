@@ -96,9 +96,28 @@ def run_research_assistant_chatbot():
         results = db.similarity_search_with_relevance_scores(prompt_with_history, k=3)
         with st.spinner("Thinking..."):
             if len(results) == 0 or results[0][1] < 0.85:
-                model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-                # query the assistant here instead
-                response_text = model.predict(prompt_with_history)      
+                # model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+                # # query the assistant here instead
+                # response_text = model.predict(prompt_with_history)      
+                # response = f" {response_text}"
+                client = OpenAI()
+                def query_lab_ai_assistant(question):
+                    stream = client.chat.completions.create(
+                        model="gpt-3.5-turbo-0125",  # Make sure to use the correct model version you have access to
+                        messages=[
+                            {"role": "system", "content": "You are a data analyst, which can produce graphs."},
+                            {"role": "user", "content": question},
+                        ],
+                        stream=True
+                    )
+                    # Initialize an empty string to collect the streamed response
+                    response_text = ""
+                    for chunk in stream:
+                        # Check if there is content to append to the response
+                        if chunk.choices[0].delta.content is not None:
+                            response_text += chunk.choices[0].delta.content
+                    return response_text
+                response_text = query_lab_ai_assistant(prompt_with_history)
                 response = f" {response_text}"
                 follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
                 very_strong_correlation_threshold = 0.7
