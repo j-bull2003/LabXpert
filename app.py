@@ -1,4 +1,4 @@
-from openai import OpenAI, AssistantEventHandler
+from openai
 import time
 import streamlit as st
 from dotenv import load_dotenv
