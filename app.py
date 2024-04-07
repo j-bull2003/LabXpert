@@ -62,7 +62,7 @@ def run_research_assistant_chatbot():
     def query_ai_assistant(prompt):
         openai.api_key = st.secrets["OPENAI_API_KEY"]
         
-        response = openai.Completion.create(
+        response = openai.ChatCompletion.create(
         engine="gpt-4", 
         prompt=prompt,
         temperature=0.7,
