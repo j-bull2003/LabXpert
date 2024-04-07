@@ -108,6 +108,11 @@ def run_research_assistant_chatbot():
                             {"role": "user", "content": question},
                         ],
                         stream=True,
+                        tools =[
+                            {
+                                "type": "code_interpreter",
+                            }
+                        ]
                     )
                     # Initialize an empty string to collect the streamed response
                     response_text = ""
@@ -160,6 +165,11 @@ def run_research_assistant_chatbot():
                                 {"role": "user", "content": question},
                             ],
                             stream=True,
+                            tools =[
+                                {
+                                    "type": "code_interpreter",
+                                }
+                            ]
                         )
                         # Initialize an empty string to collect the streamed response
                         response_text = ""
