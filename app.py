@@ -63,7 +63,7 @@ def run_research_assistant_chatbot():
         openai.api_key = st.secrets["OPENAI_API_KEY"]
         
         response = openai.ChatCompletion.create(
-        engine="gpt-4", 
+        engine="gpt-3.5-turbo", 
         prompt=prompt,
         temperature=0.7,
         max_tokens=150,
