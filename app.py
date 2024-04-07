@@ -118,6 +118,7 @@ def run_research_assistant_chatbot():
                 #         if chunk.choices[0].delta.content is not None:
                 #             response_text += chunk.choices[0].delta.content
                 #     return response_text
+                openai_api_key = st.secrets["OPENAI_API_KEY"]
                 def query_lab_ai_assistant(question, openai_api_key):
                     openai.api_key = openai_api_key  # Ensure your OpenAI API key is correctly set here
                     response = openai.ChatCompletion.create(
