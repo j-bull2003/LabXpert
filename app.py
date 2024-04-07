@@ -96,44 +96,11 @@ def run_research_assistant_chatbot():
         results = db.similarity_search_with_relevance_scores(prompt_with_history, k=3)
         with st.spinner("Thinking..."):
             if len(results) == 0 or results[0][1] < 0.85:
-                # model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-                # # query the assistant here instead
-                # response_text = model.predict(prompt_with_history)      
-                # response = f" {response_text}"
+                model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+                # query the assistant here instead
+                response_text = model.predict(prompt_with_history)      
                 
-                # client = OpenAI()
-                # def query_lab_ai_assistant(question):
-                #     stream = client.chat.completions.create(
-                #         model="gpt-3.5-turbo-0125",  # Make sure to use the correct model version you have access to
-                #         messages=[
-                #             {"role": "system", "content": "You are a data analyst, which can produce graphs."},
-                #             {"role": "user", "content": question},
-                #         ],
-                #         stream=True
-                #     )
-                #     # Initialize an empty string to collect the streamed response
-                #     response_text = ""
-                #     for chunk in stream:
-                #         # Check if there is content to append to the response
-                #         if chunk.choices[0].delta.content is not None:
-                #             response_text += chunk.choices[0].delta.content
-                #     return response_text
-                openai_api_key = st.secrets["OPENAI_API_KEY"]
-                def query_lab_ai_assistant(question, openai_api_key):
-                    client = OpenAI()
-                    openai.api_key = openai_api_key  # Ensure your OpenAI API key is correctly set here
-                    response = client.chat.completions.create(
-                        model="gpt-3.5-turbo",
-                        messages=[
-                            {"role": "system", "content": "You are a knowledgeable assistant capable of interpreting and executing code."},
-                            {"role": "user", "content": question},
-                        ],
-                        # tools=[{"type": "code_interpreter"}],  # Adding the Code Interpreter tool
-                    )
-                    # If streaming is not needed, directly return the last message's content.
-                    # Streaming responses is usually not required for synchronous requests.
-                    return response["choices"][0]["message"]["content"]
-                response_text = query_lab_ai_assistant(prompt_with_history, openai_api_key)
+
                 response = f" {response_text}"
                 follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
                 very_strong_correlation_threshold = 0.7
@@ -163,27 +130,10 @@ def run_research_assistant_chatbot():
                         "Please answer the question directly with a lot of extra detail, citing relevant sections (author, year) for support. Everything that is taken word for word from a source should be in quotation marks."
                         f"At the end, Suggest a further question/experiment that relates, and cite them as (author, year): {combined_input}"
                     )
-                    client = OpenAI()
-                    def query_lab_ai_assistant(question):
-                        stream = client.chat.completions.create(
-                            model="gpt-3.5-turbo-0125",  # Make sure to use the correct model version you have access to
-                            messages=[
-                                {"role": "system", "content": "You are a data analyst, which can produce graphs."},
-                                {"role": "user", "content": question},
-                            ],
-                            stream=True
-                        )
-                        
-                        response_text = ""
-                        for chunk in stream:
-                            # Check if there is content to append to the response
-                            if chunk.choices[0].delta.content is not None:
-                                response_text += chunk.choices[0].delta.content
-                        return response_text
-                    integrated_response = query_lab_ai_assistant(query_for_llm)
-                    # response = f" {response_text}"
+
+                    response = f" {response_text}"
                     
-                    # integrated_response = model.predict(query_for_llm)
+                    integrated_response = model.predict(query_for_llm)
                     sources_formatted = "\n".join(sources) 
                     citations = sources_formatted
                     
