@@ -64,16 +64,14 @@ def run_research_assistant_chatbot():
         
         response = openai.ChatCompletion.create(
             model="gpt-4", 
-            prompt=prompt,
-            temperature=0.7,
-            max_tokens=150,
-            top_p=1.0,
-            frequency_penalty=0.0,
-            presence_penalty=0.0
-            )
+
+            temperature = 1,
+            messages = [
+                {"role": "user", "content": prompt}
+            ]
+        )
+        return response.choices[0]["message"]["content"]
         
-        # return response.choices[0].text.strip()
-        return response
     
     def load_chat_history():
         with shelve.open("chat_history") as db:
