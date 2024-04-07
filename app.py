@@ -189,7 +189,7 @@ def run_research_assistant_chatbot():
         else:
             st.warning("Assistant name does exist in assistants_dict. Please choose another name.")
             
-    def query_assistant(client, assistant_id, user_prompt):
+    def query_assistant(client, user_prompt):
         """
         Queries an OpenAI Assistant with a given user prompt and returns the assistant's response.
 
@@ -198,8 +198,7 @@ def run_research_assistant_chatbot():
         :param user_prompt: The prompt or question from the user.
         :return: The assistant's response text.
         """
-
-        response = client.beta.threads.create(assistant_id, messages=[{"role": "system", "content": "You are a research assistant."}, {"role": "user", "content": user_prompt}])
+        response = client.beta.threads.create(messages=[{"role": "system", "content": "You are a research assistant."}, {"role": "user", "content": user_prompt}])
         return response.choices[0].message['content']
 
 
@@ -231,7 +230,7 @@ def run_research_assistant_chatbot():
                 # Assume `assistant_id` is obtained from your assistant creation or configuration logic
                 assistant_id = "asst_HFbYDKBlJ6JRwtyS6NX1yawZ"  # This should be dynamically retrieved based on your application's logic
                 
-                response_text = query_assistant(client, assistant_id, prompt_with_history)
+                response_text = query_assistant(client, prompt_with_history)
                 # response_text = query_assistant(prompt_with_history)      
                 
 
@@ -273,7 +272,7 @@ def run_research_assistant_chatbot():
                     # Assume `assistant_id` is obtained from your assistant creation or configuration logic
                     assistant_id = "asst_HFbYDKBlJ6JRwtyS6NX1yawZ"  # This should be dynamically retrieved based on your application's logic
                     
-                    integrated_response = query_assistant(client, assistant_id, query_for_llm)
+                    integrated_response = query_assistant(client, query_for_llm)
                     # integrated_response = query_assistant(query_for_llm)
                     sources_formatted = "\n".join(sources) 
                     citations = sources_formatted
