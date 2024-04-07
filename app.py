@@ -58,10 +58,13 @@ def run_research_assistant_chatbot():
         st.session_state["openai_model"] = "gpt-3.5-turbo"
 
     
-    def load_chat_history():
-        with shelve.open("chat_history") as db:
-            return db.get("messages", [])
+    # def load_chat_history():
+    #     with shelve.open("chat_history") as db:
+    #         return db.get("messages", [])
 
+# def save_chat_history(messages):
+#     with shelve.open("chat_history") as db:
+#         db["messages"] = messages
 
     if "messages" not in st.session_state:
         st.session_state.messages = load_chat_history()
@@ -365,15 +368,12 @@ def create_assistant(client):
                     st.markdown(message["citations"], unsafe_allow_html=True)
 
 
-        user_prompt = st.chat_input("How can I help?")
+    user_prompt = st.chat_input("How can I help?")
 
-        if user_prompt:
-            st.session_state.messages.append({"role": "user", "content": user_prompt})
-            formulate_response(user_prompt)
-        
-    # def save_chat_history(messages):
-    #     with shelve.open("chat_history") as db:
-    #         db["messages"] = messages
+    if user_prompt:
+        st.session_state.messages.append({"role": "user", "content": user_prompt})
+        formulate_response(user_prompt)
+
     # save_chat_history(st.session_state.messages)
     
 def main():
