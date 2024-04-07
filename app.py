@@ -347,7 +347,8 @@ def run_research_assistant_chatbot():
             if len(results) == 0 or results[0][1] < 0.85:
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name='gpt-4')
                 # query the assistant here instead
-                response_text = chat_prompt(prompt_with_history)      
+                client = OpenAI(api_key=openai_api_key)
+                response_text = chat_prompt(client, prompt_with_history)      
                 
 
                 response = f" {response_text}"
@@ -382,8 +383,8 @@ def run_research_assistant_chatbot():
                     )
 
                     response = f" {response_text}"
-                    
-                    integrated_response = chat_prompt(query_for_llm)
+                    client = OpenAI(api_key=openai_api_key) 
+                    integrated_response = chat_prompt(client, query_for_llm)
                     sources_formatted = "\n".join(sources) 
                     citations = sources_formatted
                     
