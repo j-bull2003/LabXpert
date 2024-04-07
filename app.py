@@ -136,8 +136,8 @@ def run_research_assistant_chatbot():
                 last_message = messages.data[-1]  # Assuming this object has a 'content' attribute
                 response_text = last_message.content
                             
-                response = f" {response_text}"
-                follow_up_results = db.similarity_search_with_relevance_scores(str(response_text), k=3)
+                response = f" {str(response_text)}"
+                follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
                 very_strong_correlation_threshold = 0.7
                 high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
                 if high_scoring_results:
