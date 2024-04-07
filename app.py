@@ -86,13 +86,6 @@ def run_research_assistant_chatbot():
 
         def __call__(self, input):
             return self._embed_documents(input)
-    class SimpleEventHandler(AssistantEventHandler):
-        def __init__(self):
-            self.response_text = ""
-
-        def on_text_delta(self, delta, snapshot):
-            # Append new text as it comes in
-            self.response_text += delta.value
     def formulate_response(prompt):
         citations = ""
         openai_api_key = st.secrets["OPENAI_API_KEY"]
