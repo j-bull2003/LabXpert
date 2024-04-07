@@ -100,23 +100,37 @@ def run_research_assistant_chatbot():
                 # # query the assistant here instead
                 # response_text = model.predict(prompt_with_history)      
                 # response = f" {response_text}"
-                client = OpenAI()
-                def query_lab_ai_assistant(question):
-                    stream = client.chat.completions.create(
-                        model="gpt-3.5-turbo-0125",  # Make sure to use the correct model version you have access to
+                
+                # client = OpenAI()
+                # def query_lab_ai_assistant(question):
+                #     stream = client.chat.completions.create(
+                #         model="gpt-3.5-turbo-0125",  # Make sure to use the correct model version you have access to
+                #         messages=[
+                #             {"role": "system", "content": "You are a data analyst, which can produce graphs."},
+                #             {"role": "user", "content": question},
+                #         ],
+                #         stream=True
+                #     )
+                #     # Initialize an empty string to collect the streamed response
+                #     response_text = ""
+                #     for chunk in stream:
+                #         # Check if there is content to append to the response
+                #         if chunk.choices[0].delta.content is not None:
+                #             response_text += chunk.choices[0].delta.content
+                #     return response_text
+                def query_lab_ai_assistant(question, openai_api_key):
+                    openai.api_key = openai_api_key  # Ensure your OpenAI API key is correctly set here
+                    response = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
                         messages=[
-                            {"role": "system", "content": "You are a data analyst, which can produce graphs."},
+                            {"role": "system", "content": "You are a knowledgeable assistant capable of interpreting and executing code."},
                             {"role": "user", "content": question},
                         ],
-                        stream=True
+                        tools=[{"type": "code_interpreter"}],  # Adding the Code Interpreter tool
                     )
-                    # Initialize an empty string to collect the streamed response
-                    response_text = ""
-                    for chunk in stream:
-                        # Check if there is content to append to the response
-                        if chunk.choices[0].delta.content is not None:
-                            response_text += chunk.choices[0].delta.content
-                    return response_text
+                    # If streaming is not needed, directly return the last message's content.
+                    # Streaming responses is usually not required for synchronous requests.
+                    return response["choices"][0]["message"]["content"]
                 response_text = query_lab_ai_assistant(prompt_with_history)
                 response = f" {response_text}"
                 follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
