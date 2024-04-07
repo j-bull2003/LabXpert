@@ -212,55 +212,54 @@ def run_research_assistant_chatbot():
         else:
             st.warning("Assistant name does exist in assistants_dict. Please choose another name.")
       
-    # def chat_prompt(client, assistant_option):
-    #     if prompt := st.chat_input("Enter your message here"):
-    #         # Append the user's message to the chat history for later display
-    #         user_message = client.beta.threads.messages.create(
-    #             thread_id=st.session_state.thread_id,
-    #             role="user",
-    #             content=prompt,
-    #         )
+    def chat_prompt(client, assistant_option):
+        if prompt := st.chat_input("Enter your message here"):
+            # Append the user's message to the chat history for later display
+            user_message = client.beta.threads.messages.create(
+                thread_id=st.session_state.thread_id,
+                role="user",
+                content=prompt,
+            )
 
-    #         # Ensure the messages list is updated correctly
-    #         if st.session_state.messages is None:
-    #             st.session_state.messages = [user_message]
-    #         else:
-    #             st.session_state.messages.append(user_message)
+            # Ensure the messages list is updated correctly
+            if st.session_state.messages is None:
+                st.session_state.messages = [user_message]
+            else:
+                st.session_state.messages.append(user_message)
 
-    #         # Updating the assistant's configuration
-    #         st.session_state.current_assistant = client.beta.assistants.update(
-    #             st.session_state.current_assistant.id,
-    #             instructions=st.session_state.assistant_instructions,
-    #             name=st.session_state.current_assistant.name,
-    #             tools=st.session_state.current_assistant.tools,
-    #             model=st.session_state.model_option,
-    #             file_ids=st.session_state.file_ids,
-    #         )
+            # Updating the assistant's configuration
+            st.session_state.current_assistant = client.beta.assistants.update(
+                st.session_state.current_assistant.id,
+                instructions=st.session_state.assistant_instructions,
+                name=st.session_state.current_assistant.name,
+                tools=st.session_state.current_assistant.tools,
+                model=st.session_state.model_option,
+                file_ids=st.session_state.file_ids,
+            )
 
-    #         # Processing the prompt
-    #         st.session_state.run = client.beta.threads.runs.create(
-    #             thread_id=st.session_state.thread_id,
-    #             assistant_id=assistant_option,
-    #             tools=[{"type": "code_interpreter"}],
-    #         )
+            # Processing the prompt
+            st.session_state.run = client.beta.threads.runs.create(
+                thread_id=st.session_state.thread_id,
+                assistant_id=assistant_option,
+                tools=[{"type": "code_interpreter"}],
+            )
 
-    #         pending = False
-    #         while st.session_state.run.status != "completed":
-    #             with st.spinner("Thinking..."):
-    #                 if not pending:
-    #                     # Show a temporary message while the assistant is processing
-    #                     # with st.chat_message("assistant"):
-    #                     #     st.markdown("Lab.ai is thinking...")
-    #                         pending = True
-    #                 time.sleep(3)
-    #                 st.session_state.run = client.beta.threads.runs.retrieve(
-    #                     thread_id=st.session_state.thread_id,
-    #                     run_id=st.session_state.run.id,
-    #                 )
+            pending = False
+            while st.session_state.run.status != "completed":
+                with st.spinner("Thinking..."):
+                    if not pending:
+                        # Show a temporary message while the assistant is processing
+                        # with st.chat_message("assistant"):
+                        #     st.markdown("Lab.ai is thinking...")
+                            pending = True
+                    time.sleep(3)
+                    st.session_state.run = client.beta.threads.runs.retrieve(
+                        thread_id=st.session_state.thread_id,
+                        run_id=st.session_state.run.id,
+                    )
 
-    #         if st.session_state.run.status == "completed":
-    #             st.empty()
-    #             chat_display(client)
+            if st.session_state.run.status == "completed":
+                st.empty()
             
 
     # def chat_display(client):
@@ -455,11 +454,11 @@ def run_research_assistant_chatbot():
                     st.markdown(message["citations"], unsafe_allow_html=True)
 
 
-    user_prompt = st.chat_input("How can I help?")
+    # user_prompt = st.chat_input("How can I help?")
 
-    if user_prompt:
-        st.session_state.messages.append({"role": "user", "content": user_prompt})
-        formulate_response(user_prompt)
+    # if user_prompt:
+    #     st.session_state.messages.append({"role": "user", "content": user_prompt})
+    #     formulate_response(user_prompt)
 
     save_chat_history(st.session_state.messages)
     
