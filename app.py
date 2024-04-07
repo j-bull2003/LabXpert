@@ -193,7 +193,7 @@ def run_research_assistant_chatbot():
         """
         Queries the Assistant and returns a response based on the user's prompt.
         """
-        thread_id = thread_response["id"]
+        
         thread_response = client.beta.threads.runs.create(
             thread_id=thread_id,
             assistant_id=assistant_id,
@@ -201,6 +201,7 @@ def run_research_assistant_chatbot():
             instructions="New instructions that override the Assistant instructions",
             tools=[{"type": "code_interpreter"}, {"type": "retrieval"}]
             )
+        thread_id = thread_response["id"]
         
         openai_api_key = st.secrets["OPENAI_API_KEY"]
         client = OpenAI(api_key=openai_api_key)
