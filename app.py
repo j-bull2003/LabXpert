@@ -133,7 +133,7 @@ def run_research_assistant_chatbot():
                     # If streaming is not needed, directly return the last message's content.
                     # Streaming responses is usually not required for synchronous requests.
                     return response["choices"][0]["message"]["content"]
-                response_text = query_lab_ai_assistant(prompt_with_history)
+                response_text = query_lab_ai_assistant(prompt_with_history, openai_api_key)
                 response = f" {response_text}"
                 follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
                 very_strong_correlation_threshold = 0.7
