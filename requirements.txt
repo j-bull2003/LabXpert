@@ -8,5 +8,5 @@ langchain-text-splitters
 chromadb
 pysqlite3-binary
 tiktoken
-openai
+openai<=1.0.0
 
