@@ -301,9 +301,9 @@ def run_research_assistant_chatbot():
                 response = f" {response_text}\n"
                 
         if citations:
-            st.session_state.messages.append({"role": "assistant", "content": response, "citations": citations})
+            st.session_state.messages.append({"role": "user", "content": response, "citations": citations})
         else:
-            st.session_state.messages.append({"role": "assistant", "content": response})
+            st.session_state.messages.append({"role": "user", "content": response})
         
         display_messages()
 
