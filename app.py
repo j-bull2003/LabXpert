@@ -195,13 +195,13 @@ def run_research_assistant_chatbot():
         """
         openai_api_key = st.secrets["OPENAI_API_KEY"]
         client = OpenAI(api_key=openai_api_key)
-        thread_response = client.beta.threads.runs.create(
-            thread_id=thread_id,
-            assistant_id=assistant_id,
-            model="gpt-4-turbo-preview",
-            instructions="New instructions that override the Assistant instructions",
-            tools=[{"type": "code_interpreter"}, {"type": "retrieval"}]
-            )
+        # thread_response = client.beta.threads.runs.create(
+        #     thread_id=thread_id,
+        #     assistant_id=assistant_id,
+        #     model="gpt-4-turbo-preview",
+        #     instructions="New instructions that override the Assistant instructions",
+        #     tools=[{"type": "code_interpreter"}]
+        #     )
         
         assistant_id = "asst_HFbYDKBlJ6JRwtyS6NX1yawZ" 
         run = client.beta.threads.runs.create(
@@ -211,7 +211,7 @@ def run_research_assistant_chatbot():
             instructions="New instructions that override the Assistant instructions",
             tools=[{"type": "code_interpreter"}]
             )
-        thread_id = thread_response["id"]
+        thread_id = run["id"]
         # Extract and return the latest message from the Assistant as the response
         latest_message = run["messages"][-1]["content"]
         return latest_message
