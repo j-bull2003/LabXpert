@@ -132,16 +132,17 @@ def run_research_assistant_chatbot():
                     openai_api_key = st.secrets["OPENAI_API_KEY"]
 
                     assistant_id = "asst_HFbYDKBlJ6JRwtyS6NX1yawZ"
-
+                    client = OpenAI()
                     def query_lab_ai_assistant(question):
-                        response = openai.ChatCompletion.create(
+                        response = client.chat.completions.create(
                             model="gpt-3.5-turbo",
                             messages=[
                                 {"role": "system", "content": "You are a highly knowledgeable lab assistant."},
                                 {"role": "user", "content": question},
                             ],
                             api_key=openai_api_key,
-                            assistant_id=assistant_id  # This assumes there's a parameter to specify assistant; if not, use the API in a way that targets your Lab.ai
+                            assistant_id=assistant_id,
+                            stream=True
                         )
                         return response.choices[0].message["content"]
 
