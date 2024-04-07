@@ -198,12 +198,10 @@ def run_research_assistant_chatbot():
         :param user_prompt: The prompt or question from the user.
         :return: The assistant's response text.
         """
-        try:
-            response = client.beta.assistants.chat(assistant_id, messages=[{"role": "system", "content": "You are a research assistant."}, {"role": "user", "content": user_prompt}])
-            return response.choices[0].message['content']
-        except Exception as e:
-            print(f"Error querying assistant: {e}")
-            return "I'm sorry, I encountered an issue processing your request."
+
+        response = client.beta.assistants.chat(assistant_id, messages=[{"role": "system", "content": "You are a research assistant."}, {"role": "user", "content": user_prompt}])
+        return response.choices[0].message['content']
+
 
     class CustomOpenAIEmbeddings(OpenAIEmbeddings):
         def __init__(self, openai_api_key, *args, **kwargs):
