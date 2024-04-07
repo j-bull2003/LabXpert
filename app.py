@@ -15,20 +15,18 @@ sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 def query_ai_assistant(prompt):
     openai.api_key = st.secrets["OPENAI_API_KEY"]
     
-    try:
-        response = openai.Completion.create(
-            engine="text-davinci-003",  # Or whichever model you're using, like "gpt-3.5-turbo"
-            prompt=prompt,
-            temperature=0.7,
-            max_tokens=150,
-            top_p=1.0,
-            frequency_penalty=0.0,
-            presence_penalty=0.0
-        )
-        return response.choices[0].text.strip()
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return "I'm sorry, but I couldn't process your request."
+    response = openai.Completion.create(
+      engine="gpt-4", 
+      prompt=prompt,
+      temperature=0.7,
+      max_tokens=150,
+      top_p=1.0,
+      frequency_penalty=0.0,
+      presence_penalty=0.0
+    )
+    
+    # return response.choices[0].text.strip()
+    return response
 
 def init_data_analysis():
     if "messages_data_analysis" not in st.session_state:
