@@ -116,13 +116,17 @@ def run_research_assistant_chatbot():
                 elapsed_time = 0
 
                 while elapsed_time < max_wait_time:
+                    # Retrieve the Run object again to get its latest status
                     run_status = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
-                    if run_status['status'] == 'completed':
+                    
+                    # Use dot notation to access the 'status' attribute of the Run object
+                    if run_status.status == 'completed':
                         break
-                    elif run_status['status'] in ['failed', 'cancelled']:
-                        raise Exception(f"Run did not complete successfully: {run_status['status']}")
+                    elif run_status.status in ['failed', 'cancelled']:
+                        raise Exception(f"Run did not complete successfully: {run_status.status}")
                     time.sleep(wait_interval)
                     elapsed_time += wait_interval
+
 
                 if elapsed_time >= max_wait_time:
                     raise Exception("Run did not complete within the maximum wait time.")
