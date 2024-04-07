@@ -157,7 +157,7 @@ def run_research_assistant_chatbot():
                             ],
                             stream=True
                         )
-                        # Initialize an empty string to collect the streamed response
+                        
                         response_text = ""
                         for chunk in stream:
                             # Check if there is content to append to the response
