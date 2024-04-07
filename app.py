@@ -123,6 +123,7 @@ def run_research_assistant_chatbot():
                     openai.api_key = openai_api_key  # Ensure your OpenAI API key is correctly set here
                     response = openai.ChatCompletion.create(
                         model="gpt-3.5-turbo",
+                        openai_api_key=openai_api_key,
                         messages=[
                             {"role": "system", "content": "You are a knowledgeable assistant capable of interpreting and executing code."},
                             {"role": "user", "content": question},
