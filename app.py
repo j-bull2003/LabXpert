@@ -199,7 +199,7 @@ def run_research_assistant_chatbot():
         :return: The assistant's response text.
         """
 
-        response = client.beta.assistants.chat(assistant_id, messages=[{"role": "system", "content": "You are a research assistant."}, {"role": "user", "content": user_prompt}])
+        response = client.beta.threads.create(assistant_id, messages=[{"role": "system", "content": "You are a research assistant."}, {"role": "user", "content": user_prompt}])
         return response.choices[0].message['content']
 
 
