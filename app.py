@@ -1,4 +1,4 @@
-import openai 
+from openai import OpenAI, AssistantEventHandler
 import time
 import streamlit as st
 from dotenv import load_dotenv
@@ -86,7 +86,13 @@ def run_research_assistant_chatbot():
 
         def __call__(self, input):
             return self._embed_documents(input)
+    class SimpleEventHandler(AssistantEventHandler):
+        def __init__(self):
+            self.response_text = ""
 
+        def on_text_delta(self, delta, snapshot):
+            # Append new text as it comes in
+            self.response_text += delta.value
     def formulate_response(prompt):
         citations = ""
         openai_api_key = st.secrets["OPENAI_API_KEY"]
@@ -98,16 +104,35 @@ def run_research_assistant_chatbot():
         with st.spinner("Thinking..."):
             if len(results) == 0 or results[0][1] < 0.85:
                 # model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-                client = OpenAI()
-
                 assistant = client.beta.assistants.create(
                     name="Data analyst",
                     instructions="You are a data analyst.",
                     tools=[{"type": "code_interpreter"}],
                     model="gpt-4-turbo-preview",
                 )
-                response_text = assistant(prompt_with_history)
-                response = f" {response_text}"
+
+                # Create a Thread
+                thread = client.beta.threads.create()
+
+                # Add a Message to the Thread
+                client.beta.threads.messages.create(
+                    thread_id=thread.id,
+                    role="user",
+                    content=prompt_with_history,
+                )
+
+                # Create and Stream a Run
+                event_handler = SimpleEventHandler()
+                with client.beta.threads.runs.stream(
+                    thread_id=thread.id,
+                    assistant_id=assistant.id,
+                    event_handler=event_handler,
+                ) as stream:
+                    stream.until_done()
+
+                # Use the collected response text
+                response = f" {event_handler.response_text}"
+                # response = f" {response_text}"
                 follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
                 very_strong_correlation_threshold = 0.7
                 high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
