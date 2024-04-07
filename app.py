@@ -67,7 +67,7 @@ def run_research_assistant_chatbot():
 
             temperature = 1,
             messages = [
-                {"role": "user", "content": prompt}
+                {"role": "assistant", "content": prompt}
             ]
         )
         return response.choices[0]["message"]["content"]
