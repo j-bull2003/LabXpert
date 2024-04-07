@@ -100,8 +100,8 @@ def run_research_assistant_chatbot():
                 # model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
                 # # query the assistant herre instead
                 # response_text = model.predict(prompt_with_history)
-                
-                response = ChatCompletion.create(
+                client = OpenAI()
+                response = client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[{"role": "system", "content": "You are a knowledgeable assistant."},
                             {"role": "user", "content": prompt_with_history}],
