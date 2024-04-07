@@ -107,9 +107,17 @@ def run_research_assistant_chatbot():
                 run = client.beta.threads.runs.create(thread_id=thread.id, assistant_id=assistant_id)
                 # Assuming synchronous behavior for simplicity; implement polling in practice
                 time.sleep(2)  # Simplified waiting mechanism; adjust based on actual run times
+                # After retrieving messages from the thread
                 messages = client.beta.threads.messages.list(thread_id=thread.id)
-                response_text = messages.data[-1]["content"]  # Assuming last message contains the response
-            
+
+                # If messages.data is a list of objects and the last message contains the response
+                last_message = messages.data[-1]  # Get the last message
+
+                # Access the 'content' attribute of the ThreadMessage object
+                # Adjust this line according to the actual structure and attributes of the ThreadMessage class
+                response_text = last_message.content  # Use dot notation instead of ["content"]
+                # Assuming last message contains the response
+                            
                 response = f" {response_text}"
                 follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
                 very_strong_correlation_threshold = 0.7
