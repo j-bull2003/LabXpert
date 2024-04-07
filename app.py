@@ -365,15 +365,16 @@ def create_assistant(client):
                     st.markdown(message["citations"], unsafe_allow_html=True)
 
 
-    user_prompt = st.chat_input("How can I help?")
+        user_prompt = st.chat_input("How can I help?")
 
-    if user_prompt:
-        st.session_state.messages.append({"role": "user", "content": user_prompt})
-        formulate_response(user_prompt)
-    def save_chat_history(messages):
-        with shelve.open("chat_history") as db:
-            db["messages"] = messages
-    save_chat_history(st.session_state.messages)
+        if user_prompt:
+            st.session_state.messages.append({"role": "user", "content": user_prompt})
+            formulate_response(user_prompt)
+        
+    # def save_chat_history(messages):
+    #     with shelve.open("chat_history") as db:
+    #         db["messages"] = messages
+    # save_chat_history(st.session_state.messages)
     
 def main():
     st.sidebar.title("Science.ai")
