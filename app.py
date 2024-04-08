@@ -370,7 +370,7 @@ def run_data_analysis_chatbot():
       
     def chat_prompt(client, assistant_option):
         if prompt := st.chat_input("Enter your message here"):
-            run_research_assistant_chatbot.formulate_response(prompt)
+            # run_research_assistant_chatbot.formulate_response(prompt)
             # Append the user's message to the chat history for later display
             user_message = client.beta.threads.messages.create(
                 thread_id=st.session_state.thread_id,
