@@ -91,7 +91,8 @@ def run_research_assistant_chatbot():
         openai_api_key = st.secrets["OPENAI_API_KEY"]
         embedding_function = CustomOpenAIEmbeddings(openai_api_key=openai_api_key)
         db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
-        chat_history = "\n".join([msg['content'] for msg in st.session_state.messages if msg['role'] == "user"])
+        # chat_history = "\n".join([msg['content'] for msg in st.session_state.messages if msg['role'] == "user"])
+        chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
 
         prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
         results = db.similarity_search_with_relevance_scores(prompt_with_history, k=3)
