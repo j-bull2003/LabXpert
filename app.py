@@ -132,7 +132,7 @@ def run_research_assistant_chatbot():
 
         results = search_similar_texts(prompt_with_history, df)
         with st.spinner("Thinking..."):
-            if len(results) == 0 or results[0][1] < 0.85:
+            if len(results) == 0 or results[0][8] < 0.85:
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
                 # query the assistant here instead
                 response_text = model.predict(prompt_with_history)      
