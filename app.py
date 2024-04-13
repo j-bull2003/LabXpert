@@ -139,7 +139,7 @@ def run_research_assistant_chatbot():
                 
 
                 response = f" {response_text}"
-                follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
+                follow_up_results = search_similar_texts(response_text, k=3)
                 very_strong_correlation_threshold = 0.7
                 high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
                 if high_scoring_results:
