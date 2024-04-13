@@ -29,15 +29,19 @@ conn = st.experimental_connection("gsheets", type=GSheetsConnection)
 
 
 
-
 load_dotenv()
 openai_api_key = st.secrets["OPENAI_API_KEY"]
+
+# Define URL and connect to Google Sheets
 url = "https://docs.google.com/spreadsheets/d/1Ao-pNzVZXMPw13FAF8ZQL_V9TazZCuStAVIut6OLUQ0/edit#gid=363208242"
 conn = st.experimental_connection("gsheets", type=GSheetsConnection)
 data = conn.read(spreadsheet=url)
+
+# Create DataFrame with specific columns
 df = pd.DataFrame(data, columns=['PMID', 'Title', 'Author(s) Full Name', 'Author(s) Affiliation', 'Journal Title', 'Place of Publication', 'Date of Publication', 'Publication Type', 'Abstract'])
 df['combined_text'] = df.apply(lambda row: ' '.join(row.values.astype(str)), axis=1)
 
+# Function to search for similar texts based on TF-IDF
 def search_similar_texts(query, data_frame, k=3):
     tfidf_vectorizer = TfidfVectorizer()
     tfidf_matrix = tfidf_vectorizer.fit_transform(data_frame['combined_text'])
@@ -71,7 +75,7 @@ def init_research_assistant():
     if "openai_model" not in st.session_state:
         st.session_state["openai_model"] = "gpt-3.5-turbo"
 
-load_dotenv()
+
 def run_research_assistant_chatbot():
     st.title("Research Assistant 🔬")
     st.caption('Analyse your experimental data')
@@ -131,7 +135,7 @@ def run_research_assistant_chatbot():
         
         with st.spinner("Thinking..."):
             # Decide whether to use DB, GPT, or DB+GPT based on the similarity scores and the content availability
-            if results_df.empty or all(score < 1 for score in similarity_scores):
+            if results_df.empty or all(score < 0.5 for score in similarity_scores):
                 # If no similar texts are found or all texts are below threshold, use GPT model
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
                 response_text = model.predict(prompt_with_history)
