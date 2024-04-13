@@ -161,13 +161,12 @@ def run_research_assistant_chatbot():
                         f"At the end, Suggest a further question/experiment that relates, and cite them as (author, year): {combined_input}"
                     )
 
-                    response = f" {response_text}"
                     
                     integrated_response = model.predict(query_for_llm)
                     sources_formatted = "\n".join(sources) 
                     citations = sources_formatted
                     
-                    response = f" {integrated_response}\n"
+                    response = f" db+gpt: {integrated_response}\n"
             else:
                 context_texts = []
                 sources = []
