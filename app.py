@@ -30,12 +30,29 @@ conn = st.experimental_connection("gsheets", type=GSheetsConnection)
 
 
 
-load_dotenv()
+# load_dotenv()
 openai_api_key = st.secrets["OPENAI_API_KEY"]
-url = "https://docs.google.com/spreadsheets/d/1Ao-pNzVZXMPw13FAF8ZQL_V9TazZCuStAVIut6OLUQ0/edit#gid=363208242"
-conn = st.experimental_connection("gsheets", type=GSheetsConnection)
-data = conn.read(spreadsheet=url)
-df = pd.DataFrame(data, columns=['PMID', 'Title', 'Author(s) Full Name', 'Author(s) Affiliation', 'Journal Title', 'Place of Publication', 'Date of Publication', 'Publication Type', 'Abstract'])
+# url = "https://docs.google.com/spreadsheets/d/1Ao-pNzVZXMPw13FAF8ZQL_V9TazZCuStAVIut6OLUQ0/edit#gid=363208242"
+# conn = st.experimental_connection("gsheets", type=GSheetsConnection)
+# data = conn.read(spreadsheet=url)
+# df = pd.DataFrame(data, columns=['PMID', 'Title', 'Author(s) Full Name', 'Author(s) Affiliation', 'Journal Title', 'Place of Publication', 'Date of Publication', 'Publication Type', 'Abstract'])
+# df['combined_text'] = df.apply(lambda row: ' '.join(row.values.astype(str)), axis=1)
+
+# def search_similar_texts(query, data_frame, k=3):
+#     tfidf_vectorizer = TfidfVectorizer()
+#     tfidf_matrix = tfidf_vectorizer.fit_transform(data_frame['combined_text'])
+#     query_vector = tfidf_vectorizer.transform([query])
+#     cosine_similarities = cosine_similarity(query_vector, tfidf_matrix).flatten()
+#     top_indices = cosine_similarities.argsort()[-k:][::-1]
+#     return data_frame.iloc[top_indices], cosine_similarities[top_indices]
+def load_data():
+    url = "https://docs.google.com/spreadsheets/d/1Ao-pNzVZXMPw13FAF8ZQL_V9TazZCuStAVIut6OLUQ0/edit#gid=363208242"
+    sheet = st.experimental_gsheets.read(url)
+    return pd.DataFrame(sheet)
+
+df = load_data()
+
+# Add combined text column for search
 df['combined_text'] = df.apply(lambda row: ' '.join(row.values.astype(str)), axis=1)
 
 def search_similar_texts(query, data_frame, k=3):
@@ -128,24 +145,26 @@ def run_research_assistant_chatbot():
         prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
 
         results_df, similarity_scores = search_similar_texts(prompt_with_history, df, k=3)
+        response = "Here are the most relevant articles based on your question:\n"
+        for index, row in results_df.iterrows():
+            response += f"- {row['Title']} by {row['Author(s) Full Name']} ({row['Date of Publication']})\n"
+        st.session_state.messages.append({"role": "assistant", "content": response})
         
         with st.spinner("Thinking..."):
             if results_df.empty or all(score < 0.5 for score in similarity_scores):
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-                # query the assistant here instead
                 response_text = model.predict(prompt_with_history)      
-                
-
                 response = f" {response_text}"
-                follow_up_results = search_similar_texts(response_text, df, k=3)
-                very_strong_correlation_threshold = 0.7
                 follow_up_results_df, follow_up_similarity_scores = search_similar_texts(response_text, df, k=3)
                 high_scoring_results = follow_up_results_df[follow_up_similarity_scores >= 0.7]
 
                 if not high_scoring_results.empty:
-
                     sources = []
                     combined_texts = []
+                    response = "Here are the most relevant articles based on your question:\n"
+                    for index, row in results_df.iterrows():
+                        response += f"- {row['Title']} by {row['Author(s) Full Name']} ({row['Date of Publication']})\n"
+                    st.session_state.messages.append({"role": "assistant", "content": response})
                     for i, (doc, _score) in enumerate(high_scoring_results):
                         doc_content = doc.page_content
                         first_author = doc.metadata['authors'].split(',')[0] if 'authors' in doc.metadata and doc.metadata['authors'] else "Unknown"
@@ -161,7 +180,6 @@ def run_research_assistant_chatbot():
                         )
                         sources.append(source_info)
                     combined_input = " ".join(combined_texts)
-                    # query_for_llm = f"{combined_input} Answer the question with citation to the paragraphs. For every sentence you write, cite the book name and paragraph number as (author, year). At the end of your commentary, suggest a further question that can be answered by the paragraphs provided."
                     query_for_llm = (
                         f"Answer the question with citations to each sentence:\n{combined_input}\n\n"
                         f"Question: {prompt}\n\n"
@@ -179,6 +197,9 @@ def run_research_assistant_chatbot():
             else:
                 context_texts = []
                 sources = []
+                response = "Here are the most relevant articles based on your question:\n"
+                for index, row in results_df.iterrows():
+                    response += f"- {row['Title']} by {row['Author(s) Full Name']} ({row['Date of Publication']})\n"
                 for doc, _score in follow_up_results_df:
                     source_info = (
                         f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
