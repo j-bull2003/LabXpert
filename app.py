@@ -31,7 +31,7 @@ conn = st.experimental_connection("gsheets", type=GSheetsConnection)
 
 
 data = conn.read(spreadsheet=url, usecols=[0, 8])  # read relevant columns
-df = pd.DataFrame(data, columns=['title', 'abstract'])  # create a DataFrame with appropriate column names
+df = pd.DataFrame(data, columns=['Title', 'Abstract'])  # create a DataFrame with appropriate column names
 
 def search_similar_texts(query, data_frame):
     """ Searches for texts similar to `query` in `data_frame` using TF-IDF and cosine similarity. """
