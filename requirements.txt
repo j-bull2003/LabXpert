@@ -10,4 +10,4 @@ tiktoken
 openai==1.2.2
 pandas
 scikit-learn
-streamlit_gsheets
+st-gsheets-connection
