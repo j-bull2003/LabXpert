@@ -121,8 +121,10 @@ def run_research_assistant_chatbot():
         def __call__(self, input):
             return self._embed_documents(input)
 
+
     def formulate_response(prompt):
         openai_api_key = st.secrets["OPENAI_API_KEY"]
+        citations = ""
         chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
         prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
 
@@ -130,111 +132,76 @@ def run_research_assistant_chatbot():
         
         with st.spinner("Thinking..."):
             if results_df.empty or all(score < 0.5 for score in similarity_scores):
-                # If no results meet the threshold, query the assistant
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-                response_text = model.predict(prompt_with_history)
+                # query the assistant here instead
+                response_text = model.predict(prompt_with_history)      
+                
 
-                # Search for follow-up results based on the new response
-                follow_up_results_df, follow_up_similarity_scores = search_similar_texts(response_text, df, k=3)
-                high_scoring_follow_up_results = follow_up_results_df[follow_up_similarity_scores >= 0.7]
+                response = f" {response_text}"
+                follow_up_results = search_similar_texts(response_text, df, k=3)
+                very_strong_correlation_threshold = 0.7
+                high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
+                if high_scoring_results:
+                    sources = []
+                    combined_texts = []
+                    for i, (doc, _score) in enumerate(high_scoring_results):
+                        doc_content = doc.page_content
+                        first_author = doc.metadata['authors'].split(',')[0] if 'authors' in doc.metadata and doc.metadata['authors'] else "Unknown"
+                        citation_key = f"({first_author} et al., {doc.metadata.get('year', 'Unknown')})"
+                        combined_texts.append(f"{doc_content} {citation_key}")
+                        source_info = (
+                            f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
+                            f"({doc.metadata.get('year', 'Unknown')}),\n"
+                            f"\"{doc.metadata['title']}\",\n"
+                            f"PMID: {doc.metadata.get('pub_id', 'N/A')},\n"
+                            f"Available at: {doc.metadata.get('url', 'N/A')},\n"
+                            f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
+                        )
+                        sources.append(source_info)
+                    combined_input = " ".join(combined_texts)
+                    # query_for_llm = f"{combined_input} Answer the question with citation to the paragraphs. For every sentence you write, cite the book name and paragraph number as (author, year). At the end of your commentary, suggest a further question that can be answered by the paragraphs provided."
+                    query_for_llm = (
+                        f"Answer the question with citations to each sentence:\n{combined_input}\n\n"
+                        f"Question: {prompt}\n\n"
+                        "Please answer the question directly with a lot of extra detail, citing relevant sections (author, year) for support. Everything that is taken word for word from a source should be in quotation marks."
+                        f"At the end, Suggest a further question/experiment that relates, and cite them as (author, year): {combined_input}"
+                    )
 
-                if not high_scoring_follow_up_results.empty:
-                    # Compile citations from follow-up results
-                    sources = compile_sources(high_scoring_follow_up_results)
-                    response = f"{response_text}\n\nReferences:\n{sources}"
-                else:
-                    response = response_text
+                    response = f" {response_text}"
+                    
+                    integrated_response = model.predict(query_for_llm)
+                    sources_formatted = "\n".join(sources) 
+                    citations = sources_formatted
+                    
+                    response = f" {integrated_response}\n"
             else:
-                # Handle cases where initial results are satisfactory
-                sources = compile_sources(results_df)
-                response = f"Relevant sources based on your question:\n{sources}"
+                context_texts = []
+                sources = []
+                for doc, _score in results_df:
+                    source_info = (
+                        f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
+                        f"({doc.metadata.get('year', 'Unknown')}),\n"
+                        f"\"{doc.metadata['title']}\",\n"
+                        f"PMID: {doc.metadata.get('pub_id', 'N/A')},\n"
+                        f"Available at: {doc.metadata.get('url', 'N/A')},\n"
+                        f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
+                    )
+                    sources.append(source_info)
+                context_text = "\n\n---\n\n".join(context_texts)
+                prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
+                formatted_prompt = prompt_template.format(context=context_text, question=prompt_with_history)
+                model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+                response_text = model.predict(formatted_prompt)
+                sources_formatted = "\n\n".join(sources)
+                citations = sources_formatted    
+                response = f" {response_text}\n"
+                
 
-            if 'messages' not in st.session_state:
-                st.session_state['messages'] = []
+
+        if citations:
+            st.session_state.messages.append({"role": "assistant", "content": response, "citations": citations})
+        else:
             st.session_state.messages.append({"role": "assistant", "content": response})
-        def compile_sources(data_frame):
-            """ Helper function to format sources from DataFrame results. """
-            return "\n".join(
-                f"{row['Title']} (PMID: {row['PMID']}), published {row['Date of Publication']} at {row['Place of Publication']}"
-                for index, row in data_frame.iterrows()
-            )
-
-    # def formulate_response(prompt):
-    #     openai_api_key = st.secrets["OPENAI_API_KEY"]
-    #     citations = ""
-    #     chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
-    #     prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
-
-    #     results = search_similar_texts(prompt_with_history, df, k=3)
-    #     with st.spinner("Thinking..."):
-    #         if len(results) == 0 or results[0][1] < 0.85:
-    #             model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-    #             # query the assistant here instead
-    #             response_text = model.predict(prompt_with_history)      
-                
-
-    #             response = f" {response_text}"
-    #             follow_up_results = search_similar_texts(response_text, df, k=3)
-    #             very_strong_correlation_threshold = 0.7
-    #             high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
-    #             if high_scoring_results:
-    #                 sources = []
-    #                 combined_texts = []
-    #                 for i, (doc, _score) in enumerate(high_scoring_results):
-    #                     doc_content = doc.page_content
-    #                     first_author = doc.metadata['authors'].split(',')[0] if 'authors' in doc.metadata and doc.metadata['authors'] else "Unknown"
-    #                     citation_key = f"({first_author} et al., {doc.metadata.get('year', 'Unknown')})"
-    #                     combined_texts.append(f"{doc_content} {citation_key}")
-    #                     source_info = (
-    #                         f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
-    #                         f"({doc.metadata.get('year', 'Unknown')}),\n"
-    #                         f"\"{doc.metadata['title']}\",\n"
-    #                         f"PMID: {doc.metadata.get('pub_id', 'N/A')},\n"
-    #                         f"Available at: {doc.metadata.get('url', 'N/A')},\n"
-    #                         f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
-    #                     )
-    #                     sources.append(source_info)
-    #                 combined_input = " ".join(combined_texts)
-    #                 # query_for_llm = f"{combined_input} Answer the question with citation to the paragraphs. For every sentence you write, cite the book name and paragraph number as (author, year). At the end of your commentary, suggest a further question that can be answered by the paragraphs provided."
-    #                 query_for_llm = (
-    #                     f"Answer the question with citations to each sentence:\n{combined_input}\n\n"
-    #                     f"Question: {prompt}\n\n"
-    #                     "Please answer the question directly with a lot of extra detail, citing relevant sections (author, year) for support. Everything that is taken word for word from a source should be in quotation marks."
-    #                     f"At the end, Suggest a further question/experiment that relates, and cite them as (author, year): {combined_input}"
-    #                 )
-
-    #                 response = f" {response_text}"
-                    
-    #                 integrated_response = model.predict(query_for_llm)
-    #                 sources_formatted = "\n".join(sources) 
-    #                 citations = sources_formatted
-                    
-    #                 response = f" {integrated_response}\n"
-    #         else:
-    #             context_texts = []
-    #             sources = []
-    #             for doc, _score in results:
-    #                 source_info = (
-    #                     f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
-    #                     f"({doc.metadata.get('year', 'Unknown')}),\n"
-    #                     f"\"{doc.metadata['title']}\",\n"
-    #                     f"PMID: {doc.metadata.get('pub_id', 'N/A')},\n"
-    #                     f"Available at: {doc.metadata.get('url', 'N/A')},\n"
-    #                     f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
-    #                 )
-    #                 sources.append(source_info)
-    #             context_text = "\n\n---\n\n".join(context_texts)
-    #             prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
-    #             formatted_prompt = prompt_template.format(context=context_text, question=prompt_with_history)
-    #             model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-    #             response_text = model.predict(formatted_prompt)
-    #             sources_formatted = "\n\n".join(sources)
-    #             citations = sources_formatted    
-    #             response = f" {response_text}\n"
-                
-
-
-        st.session_state.messages.append({"role": "assistant", "content": response})
         
         display_messages()
 
@@ -269,10 +236,10 @@ def run_research_assistant_chatbot():
                     typewriter(container, text, speed=50)
                 else:
                     container.markdown(text, unsafe_allow_html=True)
-            # if "citations" in message and message["citations"]:
-            #     citations_button_label = "Show Citations"
-            #     with st.expander(citations_button_label):
-            #         st.markdown(message["citations"], unsafe_allow_html=True)
+            if "citations" in message and message["citations"]:
+                citations_button_label = "Show Citations"
+                with st.expander(citations_button_label):
+                    st.markdown(message["citations"], unsafe_allow_html=True)
 
 
     user_prompt = st.chat_input("How can I help?")
