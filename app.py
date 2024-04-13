@@ -232,10 +232,9 @@ def run_research_assistant_chatbot():
     #             citations = sources_formatted    
     #             response = f" {response_text}\n"
                 
-        if citations:
-            st.session_state.messages.append({"role": "assistant", "content": response, "citations": citations})
-        else:
-            st.session_state.messages.append({"role": "assistant", "content": response})
+
+
+        st.session_state.messages.append({"role": "assistant", "content": response})
         
         display_messages()
 
