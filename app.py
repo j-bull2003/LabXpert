@@ -123,82 +123,60 @@ def run_research_assistant_chatbot():
 
     def formulate_response(prompt):
         openai_api_key = st.secrets["OPENAI_API_KEY"]
-        citations = ""
         chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
         prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
 
+        # Search for similar texts in the database
         results_df, similarity_scores = search_similar_texts(prompt_with_history, df, k=3)
         
         with st.spinner("Thinking..."):
-            if results_df.empty or all(score < 0.9 for score in similarity_scores):
+            # Decide whether to use DB, GPT, or DB+GPT based on the similarity scores and the content availability
+            if results_df.empty or all(score < 0.5 for score in similarity_scores):
+                # If no similar texts are found or all texts are below threshold, use GPT model
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-                response_text = model.predict(prompt_with_history)      
-                response = f" gpt:{response_text}"
-                follow_up_results_df, follow_up_similarity_scores = search_similar_texts(response_text, df, k=3)
-                high_scoring_results = follow_up_results_df[follow_up_similarity_scores >= 0.5]
-
-                if not high_scoring_results.empty:
-                    sources = []
-                    combined_texts = []
-                    for i, (doc, _score) in enumerate(high_scoring_results):
+                response_text = model.predict(prompt_with_history)
+                response = f"gpt: {response_text}"
+            else:
+                # If similar texts are found, prepare to integrate DB and GPT
+                combined_texts = []
+                sources = []
+                for doc, score in zip(results_df.itertuples(), similarity_scores):
+                    if score >= 0.5:
                         doc_content = doc.page_content
-                        first_author = doc.metadata['authors'].split(',')[0] if 'authors' in doc.metadata and doc.metadata['authors'] else "Unknown"
-                        citation_key = f"({first_author} et al., {doc.metadata.get('year', 'Unknown')})"
-                        combined_texts.append(f"{doc_content} {citation_key}")
+                        authors = doc.metadata.get('authors', 'Unknown').split(',')[0] + " et al."
+                        year = doc.metadata.get('year', 'Unknown')
+                        citation = f"({authors}, {year})"
+                        combined_texts.append(f"{doc_content} {citation}")
                         source_info = (
-                            f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
-                            f"({doc.metadata.get('year', 'Unknown')}),\n"
-                            f"\"{doc.metadata['title']}\",\n"
+                            f"\n🦠 {authors}\n"
+                            f"({year}),\n"
+                            f"\"{doc.title}\",\n"
                             f"PMID: {doc.metadata.get('pub_id', 'N/A')},\n"
                             f"Available at: {doc.metadata.get('url', 'N/A')},\n"
                             f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
                         )
                         sources.append(source_info)
+
+                # Combine database texts and re-query the model for an integrated response
+                if combined_texts:
                     combined_input = " ".join(combined_texts)
-                    query_for_llm = (
-                        f"Answer the question with citations to each sentence:\n{combined_input}\n\n"
-                        f"Question: {prompt}\n\n"
-                        "Please answer the question directly with a lot of extra detail, citing relevant sections (author, year) for support. Everything that is taken word for word from a source should be in quotation marks."
-                        f"At the end, Suggest a further question/experiment that relates, and cite them as (author, year): {combined_input}"
-                    )
+                    model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+                    integrated_prompt = f"{combined_input}\n\nQuestion: {prompt}\nPlease integrate the above information to answer the question."
+                    integrated_response = model.predict(integrated_prompt)
+                    sources_formatted = "\n".join(sources)
+                    response = f"db+gpt: {integrated_response}\nSources:\n{sources_formatted}"
+                else:
+                    response_text = model.predict(prompt_with_history)
+                    response = f"gpt: {response_text}"
 
-                    response = f" {response_text}"
-                    
-                    integrated_response = model.predict(query_for_llm)
-                    sources_formatted = "\n".join(sources) 
-                    citations = sources_formatted
-                    
-                    response = f"db+gpt {integrated_response}\n"
+            # Add response to session state and display
+            if 'sources' in locals() and sources:
+                st.session_state.messages.append({"role": "assistant", "content": response, "citations": sources_formatted})
             else:
-                context_texts = []
-                sources = []
-                for doc, _score in follow_up_results_df:
-                    source_info = (
-                        f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
-                        f"({doc.metadata.get('year', 'Unknown')}),\n"
-                        f"\"{doc.metadata['title']}\",\n"
-                        f"PMID: {doc.metadata.get('pub_id', 'N/A')},\n"
-                        f"Available at: {doc.metadata.get('url', 'N/A')},\n"
-                        f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
-                    )
-                    sources.append(source_info)
-                context_text = "\n\n---\n\n".join(context_texts)
-                prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
-                formatted_prompt = prompt_template.format(context=context_text, question=prompt_with_history)
-                model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-                response_text = model.predict(formatted_prompt)
-                sources_formatted = "\n\n".join(sources)
-                citations = sources_formatted    
-                response = f"db: {response_text}\n"
-                
+                st.session_state.messages.append({"role": "assistant", "content": response})
+            
+            display_messages()
 
-
-        if citations:
-            st.session_state.messages.append({"role": "assistant", "content": response, "citations": citations})
-        else:
-            st.session_state.messages.append({"role": "assistant", "content": response})
-        
-        display_messages()
 
 
 
