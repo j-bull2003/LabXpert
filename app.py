@@ -142,7 +142,8 @@ def run_research_assistant_chatbot():
                 follow_up_results_df, follow_up_similarity_scores = search_similar_texts(response_text, df, k=3)
                 high_scoring_results = follow_up_results_df[follow_up_similarity_scores >= 0.7]
 
-                if high_scoring_results:
+                if not high_scoring_results.empty:
+
                     sources = []
                     combined_texts = []
                     for i, (doc, _score) in enumerate(high_scoring_results):
