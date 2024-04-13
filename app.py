@@ -133,10 +133,9 @@ def run_research_assistant_chatbot():
             if results_df.empty or all(score < 0.5 for score in similarity_scores):
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
                 response_text = model.predict(prompt_with_history)      
-                response = f" {response_text}"
                 follow_up_results_df, follow_up_similarity_scores = search_similar_texts(response_text, df, k=3)
                 high_scoring_results = follow_up_results_df[follow_up_similarity_scores >= 0.7]
-
+                response = f"db: {response_text}"
                 if not high_scoring_results.empty:
                     sources = []
                     combined_texts = []
