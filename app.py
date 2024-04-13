@@ -39,7 +39,6 @@ df = pd.DataFrame(data, columns=['PMID', 'Title', 'Author(s) Full Name', 'Author
 df['combined_text'] = df.apply(lambda row: ' '.join(row.values.astype(str)), axis=1)
 
 def search_similar_texts(query, data_frame, k=3):
-    """Searches for texts similar to `query` in `data_frame` using TF-IDF and cosine similarity."""
     tfidf_vectorizer = TfidfVectorizer()
     tfidf_matrix = tfidf_vectorizer.fit_transform(data_frame['combined_text'])
     query_vector = tfidf_vectorizer.transform([query])
@@ -140,7 +139,9 @@ def run_research_assistant_chatbot():
                 response = f" {response_text}"
                 follow_up_results = search_similar_texts(response_text, df, k=3)
                 very_strong_correlation_threshold = 0.7
-                high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
+                follow_up_results_df, follow_up_similarity_scores = search_similar_texts(response_text, df, k=3)
+                high_scoring_results = follow_up_results_df[follow_up_similarity_scores >= 0.7]
+
                 if high_scoring_results:
                     sources = []
                     combined_texts = []
@@ -177,7 +178,7 @@ def run_research_assistant_chatbot():
             else:
                 context_texts = []
                 sources = []
-                for doc, _score in results_df:
+                for doc, _score in follow_up_results_df:
                     source_info = (
                         f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
                         f"({doc.metadata.get('year', 'Unknown')}),\n"
