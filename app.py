@@ -130,7 +130,7 @@ def run_research_assistant_chatbot():
         results_df, similarity_scores = search_similar_texts(prompt_with_history, df, k=3)
         
         with st.spinner("Thinking..."):
-            if results_df.empty or all(score < 0.5 for score in similarity_scores):
+            if results_df.empty or all(score < 0.9 for score in similarity_scores):
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
                 response_text = model.predict(prompt_with_history)      
                 response = f" gpt:{response_text}"
