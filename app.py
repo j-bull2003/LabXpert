@@ -17,7 +17,7 @@ sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import streamlit as st
+
 from streamlit_gsheets import GSheetsConnection
 
 url = "https://docs.google.com/spreadsheets/d/1Ao-pNzVZXMPw13FAF8ZQL_V9TazZCuStAVIut6OLUQ0/edit#gid=363208242"
@@ -36,7 +36,7 @@ df = pd.DataFrame(data, columns=['title', 'abstract'])  # create a DataFrame wit
 def search_similar_texts(query, data_frame):
     """ Searches for texts similar to `query` in `data_frame` using TF-IDF and cosine similarity. """
     tfidf_vectorizer = TfidfVectorizer()
-    tfidf_matrix = tfidf_vectorizer.fit_transform(data_frame['content'])
+    tfidf_matrix = tfidf_vectorizer.fit_transform(data_frame['Abstract'])
     query_vector = tfidf_vectorizer.transform([query])
     cosine_similarities = cosine_similarity(query_vector, tfidf_matrix).flatten()
     top_indices = cosine_similarities.argsort()[-3:][::-1]  # Get the top 3 indices
