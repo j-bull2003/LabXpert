@@ -236,7 +236,7 @@ def run_research_assistant_chatbot():
 
         st.session_state.messages.append({"role": "assistant", "content": response})
         
-        # display_messages()
+        display_messages()
 
 
 
