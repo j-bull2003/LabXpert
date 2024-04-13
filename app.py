@@ -147,7 +147,7 @@ def run_research_assistant_chatbot():
                 response = f" {response_text}"
                 follow_up_results = search_similar_texts(response_text, df, k=3)
                 very_strong_correlation_threshold = 0.7
-                high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
+                high_scoring_results = response_text[similarity_scores >= very_strong_correlation_threshold]
                 if high_scoring_results:
                     sources = []
                     combined_texts = []
@@ -184,7 +184,7 @@ def run_research_assistant_chatbot():
             else:
                 context_texts = []
                 sources = []
-                for doc, _score in results:
+                for i, (doc, _score) in enumerate(high_scoring_results):
                     source_info = (
                         f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
                         f"({doc.metadata.get('year', 'Unknown')}),\n"
