@@ -135,7 +135,7 @@ def run_research_assistant_chatbot():
                 response_text = model.predict(prompt_with_history)      
                 response = f" gpt:{response_text}"
                 follow_up_results_df, follow_up_similarity_scores = search_similar_texts(response_text, df, k=3)
-                high_scoring_results = follow_up_results_df[follow_up_similarity_scores >= 0.7]
+                high_scoring_results = follow_up_results_df[follow_up_similarity_scores >= 0.5]
 
                 if not high_scoring_results.empty:
                     sources = []
