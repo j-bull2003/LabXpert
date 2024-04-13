@@ -35,13 +35,20 @@ df = pd.DataFrame(data, columns=['PMID', 'Title', 'Author(s) Full Name', 'Author
 
 df['combined_text'] = df.apply(lambda row: ' '.join(row.values.astype(str)), axis=1)
 
-def search_similar_texts(query, data_frame):
-    """Searches for texts similar to `query` in `data_frame` using TF-IDF and cosine similarity."""
+def search_similar_texts(query, data_frame, k=3):
+    """Searches for texts similar to `query` in `data_frame` using TF-IDF and cosine similarity.
+    Args:
+        query (str): The text query to search against the DataFrame.
+        data_frame (DataFrame): The DataFrame containing the combined text.
+        k (int): Number of top results to return.
+    Returns:
+        tuple: A tuple containing the top k rows from the DataFrame and their cosine similarities.
+    """
     tfidf_vectorizer = TfidfVectorizer()
     tfidf_matrix = tfidf_vectorizer.fit_transform(data_frame['combined_text'])
     query_vector = tfidf_vectorizer.transform([query])
     cosine_similarities = cosine_similarity(query_vector, tfidf_matrix).flatten()
-    top_indices = cosine_similarities.argsort()[-3:][::-1]  # Get the top 3 indices
+    top_indices = cosine_similarities.argsort()[-k:][::-1]  # Dynamically fetch the top k indices
     return data_frame.iloc[top_indices], cosine_similarities[top_indices]
 
 
