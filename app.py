@@ -131,7 +131,7 @@ def run_research_assistant_chatbot():
         
         with st.spinner("Thinking..."):
             # Decide whether to use DB, GPT, or DB+GPT based on the similarity scores and the content availability
-            if results_df.empty or all(score < 0.5 for score in similarity_scores):
+            if results_df.empty or all(score < 1 for score in similarity_scores):
                 # If no similar texts are found or all texts are below threshold, use GPT model
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
                 response_text = model.predict(prompt_with_history)
