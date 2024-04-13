@@ -139,7 +139,7 @@ def run_research_assistant_chatbot():
             #     # If no similar texts are found or all texts are below threshold, use GPT model
             #     model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
             #     response_text = model.predict(prompt_with_history)
-            #     response = f"gpt: {response_text}"
+            response = ""
             # else:
             if results_df.empty or all(score < 0.5 for score in similarity_scores):
                 # If similar texts are found, prepare to integrate DB and GPT
