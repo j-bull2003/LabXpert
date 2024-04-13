@@ -14,6 +14,36 @@ import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import streamlit as st
+from streamlit_gsheets import GSheetsConnection
+
+url = "https://docs.google.com/spreadsheets/d/1Ao-pNzVZXMPw13FAF8ZQL_V9TazZCuStAVIut6OLUQ0/edit#gid=363208242"
+
+conn = st.experimental_connection("gsheets", type=GSheetsConnection)
+
+# data = conn.read(spreadsheet=url, usecols=[0, 8])
+# st.dataframe(data)
+
+
+
+
+data = conn.read(spreadsheet=url, usecols=[0, 8])  # read relevant columns
+df = pd.DataFrame(data, columns=['title', 'abstract'])  # create a DataFrame with appropriate column names
+
+def search_similar_texts(query, data_frame):
+    """ Searches for texts similar to `query` in `data_frame` using TF-IDF and cosine similarity. """
+    tfidf_vectorizer = TfidfVectorizer()
+    tfidf_matrix = tfidf_vectorizer.fit_transform(data_frame['content'])
+    query_vector = tfidf_vectorizer.transform([query])
+    cosine_similarities = cosine_similarity(query_vector, tfidf_matrix).flatten()
+    top_indices = cosine_similarities.argsort()[-3:][::-1]  # Get the top 3 indices
+    return data_frame.iloc[top_indices], cosine_similarities[top_indices]
+
+
+
 def init_data_analysis():
     if "messages_data_analysis" not in st.session_state:
         st.session_state.messages_data_analysis = []
@@ -87,15 +117,20 @@ def run_research_assistant_chatbot():
         def __call__(self, input):
             return self._embed_documents(input)
     def formulate_response(prompt):
-        citations = ""
+        # citations = ""
         openai_api_key = st.secrets["OPENAI_API_KEY"]
-        embedding_function = CustomOpenAIEmbeddings(openai_api_key=openai_api_key)
-        db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
-        # chat_history = "\n".join([msg['content'] for msg in st.session_state.messages if msg['role'] == "user"])
-        chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
+        # embedding_function = CustomOpenAIEmbeddings(openai_api_key=openai_api_key)
+        # db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
+        # # chat_history = "\n".join([msg['content'] for msg in st.session_state.messages if msg['role'] == "user"])
+        # chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
 
+        # prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
+        # results = db.similarity_search_with_relevance_scores(prompt_with_history, k=3)
+        citations = ""
+        chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
         prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
-        results = db.similarity_search_with_relevance_scores(prompt_with_history, k=3)
+
+        results = search_similar_texts(prompt_with_history, df)
         with st.spinner("Thinking..."):
             if len(results) == 0 or results[0][1] < 0.85:
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
