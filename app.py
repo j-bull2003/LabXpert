@@ -130,9 +130,14 @@ def run_research_assistant_chatbot():
         citations = ""
         chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
         prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
-        results, similarities = search_similar_texts(prompt_with_history, df, k=3)
+
+        results_df, similarity_scores = search_similar_texts(prompt_with_history, df)
         with st.spinner("Thinking..."):
-            if len(results) == 0 or similarities[0] < 0.85:
+            # Filter results where the similarity is above the threshold
+            very_strong_correlation_threshold = 0.85
+            high_scoring_results = results_df[similarity_scores >= very_strong_correlation_threshold]
+
+            if high_scoring_results.empty:
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
                 
                 # query the assistant here instead
