@@ -30,13 +30,15 @@ conn = st.experimental_connection("gsheets", type=GSheetsConnection)
 
 
 
-data = conn.read(spreadsheet=url, usecols=[0, 8])  # read relevant columns
-df = pd.DataFrame(data, columns=['Title', 'Abstract'])  # create a DataFrame with appropriate column names
+data = conn.read(spreadsheet=url)  # Fetch all columns
+df = pd.DataFrame(data, columns=['PMID', 'Title', 'Author(s) Full Name', 'Author(s) Affiliation', 'Journal Title', 'Place of Publication', 'Date of Publication', 'Publication Type', 'Abstract'])
+
+df['combined_text'] = df.apply(lambda row: ' '.join(row.values.astype(str)), axis=1)
 
 def search_similar_texts(query, data_frame):
-    """ Searches for texts similar to `query` in `data_frame` using TF-IDF and cosine similarity. """
+    """Searches for texts similar to `query` in `data_frame` using TF-IDF and cosine similarity."""
     tfidf_vectorizer = TfidfVectorizer()
-    tfidf_matrix = tfidf_vectorizer.fit_transform(data_frame['Abstract'])
+    tfidf_matrix = tfidf_vectorizer.fit_transform(data_frame['combined_text'])
     query_vector = tfidf_vectorizer.transform([query])
     cosine_similarities = cosine_similarity(query_vector, tfidf_matrix).flatten()
     top_indices = cosine_similarities.argsort()[-3:][::-1]  # Get the top 3 indices
@@ -117,23 +119,15 @@ def run_research_assistant_chatbot():
         def __call__(self, input):
             return self._embed_documents(input)
     def formulate_response(prompt):
-        # citations = ""
         openai_api_key = st.secrets["OPENAI_API_KEY"]
-        # embedding_function = CustomOpenAIEmbeddings(openai_api_key=openai_api_key)
-        # db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
-        # # chat_history = "\n".join([msg['content'] for msg in st.session_state.messages if msg['role'] == "user"])
-        # chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
-
-        # prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
-        # results = db.similarity_search_with_relevance_scores(prompt_with_history, k=3)
         citations = ""
         chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
         prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
-
-        results = search_similar_texts(prompt_with_history, df)
+        results, similarities = search_similar_texts(prompt_with_history, df)
         with st.spinner("Thinking..."):
-            if len(results) == 0 or results[0][8] < 0.85:
+            if len(results) == 0 or similarities[0] < 0.85:
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+                
                 # query the assistant here instead
                 response_text = model.predict(prompt_with_history)      
                 
