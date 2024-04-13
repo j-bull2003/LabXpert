@@ -172,10 +172,9 @@ def run_research_assistant_chatbot():
                     sources_formatted = "\n".join(sources)
                     response = f"db+gpt: {integrated_response}\nSources:\n{sources_formatted}"
                 else:
-                    # model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-                    # response_text = model.predict(prompt_with_history)
-                    # response = f"gpt: {response_text}"
-                    pass
+                    model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+                    response_text = model.predict(prompt_with_history)
+                    response = f"gpt: {response_text}"
 
             # Add response to session state and display
             if 'sources' in locals() and sources:
