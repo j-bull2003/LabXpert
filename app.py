@@ -30,27 +30,22 @@ conn = st.experimental_connection("gsheets", type=GSheetsConnection)
 
 
 
-data = conn.read(spreadsheet=url)  # Fetch all columns
+load_dotenv()
+openai_api_key = st.secrets["OPENAI_API_KEY"]
+url = "https://docs.google.com/spreadsheets/d/1Ao-pNzVZXMPw13FAF8ZQL_V9TazZCuStAVIut6OLUQ0/edit#gid=363208242"
+conn = st.experimental_connection("gsheets", type=GSheetsConnection)
+data = conn.read(spreadsheet=url)
 df = pd.DataFrame(data, columns=['PMID', 'Title', 'Author(s) Full Name', 'Author(s) Affiliation', 'Journal Title', 'Place of Publication', 'Date of Publication', 'Publication Type', 'Abstract'])
-
 df['combined_text'] = df.apply(lambda row: ' '.join(row.values.astype(str)), axis=1)
 
 def search_similar_texts(query, data_frame, k=3):
-    """Searches for texts similar to `query` in `data_frame` using TF-IDF and cosine similarity.
-    Args:
-        query (str): The text query to search against the DataFrame.
-        data_frame (DataFrame): The DataFrame containing the combined text.
-        k (int): Number of top results to return.
-    Returns:
-        tuple: A tuple containing the top k rows from the DataFrame and their cosine similarities.
-    """
+    """Searches for texts similar to `query` in `data_frame` using TF-IDF and cosine similarity."""
     tfidf_vectorizer = TfidfVectorizer()
     tfidf_matrix = tfidf_vectorizer.fit_transform(data_frame['combined_text'])
     query_vector = tfidf_vectorizer.transform([query])
     cosine_similarities = cosine_similarity(query_vector, tfidf_matrix).flatten()
-    top_indices = cosine_similarities.argsort()[-k:][::-1]  # Dynamically fetch the top k indices
+    top_indices = cosine_similarities.argsort()[-k:][::-1]
     return data_frame.iloc[top_indices], cosine_similarities[top_indices]
-
 
 
 def init_data_analysis():
@@ -125,83 +120,117 @@ def run_research_assistant_chatbot():
 
         def __call__(self, input):
             return self._embed_documents(input)
+
     def formulate_response(prompt):
         openai_api_key = st.secrets["OPENAI_API_KEY"]
-        citations = ""
         chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
         prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
 
-        results_df, similarity_scores = search_similar_texts(prompt_with_history, df)
+        results_df, similarity_scores = search_similar_texts(prompt_with_history, df, k=3)
+        
         with st.spinner("Thinking..."):
-            # Filter results where the similarity is above the threshold
-            very_strong_correlation_threshold = 0.85
-            high_scoring_results = results_df[similarity_scores >= very_strong_correlation_threshold]
-
-            if high_scoring_results.empty:
+            if results_df.empty or all(score < 0.85 for score in similarity_scores):
+                # If no results meet the threshold, query the assistant
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-                
-                # query the assistant here instead
-                response_text = model.predict(prompt_with_history)      
-                
+                response_text = model.predict(prompt_with_history)
 
-                response = f" {response_text}"
-                follow_up_results = search_similar_texts(response_text, df, k=3)
-                very_strong_correlation_threshold = 0.7
-                high_scoring_results = follow_up_results[similarity_scores >= very_strong_correlation_threshold]
-                if high_scoring_results:
-                    sources = []
-                    combined_texts = []
-                    for i, (doc, _score) in enumerate(high_scoring_results):
-                        doc_content = doc.page_content
-                        first_author = doc.metadata['authors'].split(',')[0] if 'authors' in doc.metadata and doc.metadata['authors'] else "Unknown"
-                        citation_key = f"({first_author} et al., {doc.metadata.get('year', 'Unknown')})"
-                        combined_texts.append(f"{doc_content} {citation_key}")
-                        source_info = (
-                            f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
-                            f"({doc.metadata.get('year', 'Unknown')}),\n"
-                            f"\"{doc.metadata['title']}\",\n"
-                            f"PMID: {doc.metadata.get('pub_id', 'N/A')},\n"
-                            f"Available at: {doc.metadata.get('url', 'N/A')},\n"
-                            f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
-                        )
-                        sources.append(source_info)
-                    combined_input = " ".join(combined_texts)
-                    # query_for_llm = f"{combined_input} Answer the question with citation to the paragraphs. For every sentence you write, cite the book name and paragraph number as (author, year). At the end of your commentary, suggest a further question that can be answered by the paragraphs provided."
-                    query_for_llm = (
-                        f"Answer the question with citations to each sentence:\n{combined_input}\n\n"
-                        f"Question: {prompt}\n\n"
-                        "Please answer the question directly with a lot of extra detail, citing relevant sections (author, year) for support. Everything that is taken word for word from a source should be in quotation marks."
-                        f"At the end, Suggest a further question/experiment that relates, and cite them as (author, year): {combined_input}"
-                    )
+                # Search for follow-up results based on the new response
+                follow_up_results_df, follow_up_similarity_scores = search_similar_texts(response_text, df, k=3)
+                high_scoring_follow_up_results = follow_up_results_df[follow_up_similarity_scores >= 0.7]
 
-                    response = f" {response_text}"
-                    
-                    integrated_response = model.predict(query_for_llm)
-                    sources_formatted = "\n".join(sources) 
-                    citations = sources_formatted
-                    
-                    response = f" {integrated_response}\n"
+                if not high_scoring_follow_up_results.empty:
+                    # Compile citations from follow-up results
+                    sources = compile_sources(high_scoring_follow_up_results)
+                    response = f"{response_text}\n\nReferences:\n{sources}"
+                else:
+                    response = response_text
             else:
-                context_texts = []
-                sources = []
-                for i, (doc, _score) in enumerate(high_scoring_results):
-                    source_info = (
-                        f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
-                        f"({doc.metadata.get('year', 'Unknown')}),\n"
-                        f"\"{doc.metadata['title']}\",\n"
-                        f"PMID: {doc.metadata.get('pub_id', 'N/A')},\n"
-                        f"Available at: {doc.metadata.get('url', 'N/A')},\n"
-                        f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
-                    )
-                    sources.append(source_info)
-                context_text = "\n\n---\n\n".join(context_texts)
-                prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
-                formatted_prompt = prompt_template.format(context=context_text, question=prompt_with_history)
-                model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-                response_text = model.predict(formatted_prompt)
-                sources_formatted = "\n\n".join(sources)
-                citations = sources_formatted    
-                response = f" {response_text}\n"
+                # Handle cases where initial results are satisfactory
+                sources = compile_sources(results_df)
+                response = f"Relevant sources based on your question:\n{sources}"
+
+            if 'messages' not in st.session_state:
+                st.session_state['messages'] = []
+            st.session_state.messages.append({"role": "assistant", "content": response})
+        def compile_sources(data_frame):
+            """ Helper function to format sources from DataFrame results. """
+            return "\n".join(
+                f"{row['Title']} (PMID: {row['PMID']}), published {row['Date of Publication']} at {row['Place of Publication']}"
+                for index, row in data_frame.iterrows()
+            )
+
+    # def formulate_response(prompt):
+    #     openai_api_key = st.secrets["OPENAI_API_KEY"]
+    #     citations = ""
+    #     chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
+    #     prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
+
+    #     results = search_similar_texts(prompt_with_history, df, k=3)
+    #     with st.spinner("Thinking..."):
+    #         if len(results) == 0 or results[0][1] < 0.85:
+    #             model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+    #             # query the assistant here instead
+    #             response_text = model.predict(prompt_with_history)      
+                
+
+    #             response = f" {response_text}"
+    #             follow_up_results = search_similar_texts(response_text, df, k=3)
+    #             very_strong_correlation_threshold = 0.7
+    #             high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
+    #             if high_scoring_results:
+    #                 sources = []
+    #                 combined_texts = []
+    #                 for i, (doc, _score) in enumerate(high_scoring_results):
+    #                     doc_content = doc.page_content
+    #                     first_author = doc.metadata['authors'].split(',')[0] if 'authors' in doc.metadata and doc.metadata['authors'] else "Unknown"
+    #                     citation_key = f"({first_author} et al., {doc.metadata.get('year', 'Unknown')})"
+    #                     combined_texts.append(f"{doc_content} {citation_key}")
+    #                     source_info = (
+    #                         f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
+    #                         f"({doc.metadata.get('year', 'Unknown')}),\n"
+    #                         f"\"{doc.metadata['title']}\",\n"
+    #                         f"PMID: {doc.metadata.get('pub_id', 'N/A')},\n"
+    #                         f"Available at: {doc.metadata.get('url', 'N/A')},\n"
+    #                         f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
+    #                     )
+    #                     sources.append(source_info)
+    #                 combined_input = " ".join(combined_texts)
+    #                 # query_for_llm = f"{combined_input} Answer the question with citation to the paragraphs. For every sentence you write, cite the book name and paragraph number as (author, year). At the end of your commentary, suggest a further question that can be answered by the paragraphs provided."
+    #                 query_for_llm = (
+    #                     f"Answer the question with citations to each sentence:\n{combined_input}\n\n"
+    #                     f"Question: {prompt}\n\n"
+    #                     "Please answer the question directly with a lot of extra detail, citing relevant sections (author, year) for support. Everything that is taken word for word from a source should be in quotation marks."
+    #                     f"At the end, Suggest a further question/experiment that relates, and cite them as (author, year): {combined_input}"
+    #                 )
+
+    #                 response = f" {response_text}"
+                    
+    #                 integrated_response = model.predict(query_for_llm)
+    #                 sources_formatted = "\n".join(sources) 
+    #                 citations = sources_formatted
+                    
+    #                 response = f" {integrated_response}\n"
+    #         else:
+    #             context_texts = []
+    #             sources = []
+    #             for doc, _score in results:
+    #                 source_info = (
+    #                     f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
+    #                     f"({doc.metadata.get('year', 'Unknown')}),\n"
+    #                     f"\"{doc.metadata['title']}\",\n"
+    #                     f"PMID: {doc.metadata.get('pub_id', 'N/A')},\n"
+    #                     f"Available at: {doc.metadata.get('url', 'N/A')},\n"
+    #                     f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
+    #                 )
+    #                 sources.append(source_info)
+    #             context_text = "\n\n---\n\n".join(context_texts)
+    #             prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
+    #             formatted_prompt = prompt_template.format(context=context_text, question=prompt_with_history)
+    #             model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+    #             response_text = model.predict(formatted_prompt)
+    #             sources_formatted = "\n\n".join(sources)
+    #             citations = sources_formatted    
+    #             response = f" {response_text}\n"
                 
         if citations:
             st.session_state.messages.append({"role": "assistant", "content": response, "citations": citations})
