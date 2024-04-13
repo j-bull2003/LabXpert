@@ -270,10 +270,10 @@ def run_research_assistant_chatbot():
                     typewriter(container, text, speed=50)
                 else:
                     container.markdown(text, unsafe_allow_html=True)
-            if "citations" in message and message["citations"]:
-                citations_button_label = "Show Citations"
-                with st.expander(citations_button_label):
-                    st.markdown(message["citations"], unsafe_allow_html=True)
+            # if "citations" in message and message["citations"]:
+            #     citations_button_label = "Show Citations"
+            #     with st.expander(citations_button_label):
+            #         st.markdown(message["citations"], unsafe_allow_html=True)
 
 
     user_prompt = st.chat_input("How can I help?")
