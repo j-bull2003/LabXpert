@@ -47,7 +47,7 @@ def run_research_assistant_chatbot():
     st.markdown('Your personal Data Anaylist tool ')
     st.divider()
 
-    CHROMA_PATH = "s3://chromadump/chroma/"
+    CHROMA_PATH = "https://chromadump.s3.eu-west-2.amazonaws.com/chroma/.DS_Store"
     PROMPT_TEMPLATE = """
     Answer the question based only on the following context:
 
@@ -62,7 +62,7 @@ def run_research_assistant_chatbot():
         st.session_state["openai_model"] = "gpt-3.5-turbo"
 
 
-    
+
     def load_chat_history():
         with shelve.open("chat_history") as db:
             return db.get("messages", [])
