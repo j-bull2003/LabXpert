@@ -53,7 +53,6 @@ def run_research_assistant_chatbot():
         aws_access_key_id=st.secrets["aws_access_key_id"],
         aws_secret_access_key=st.secrets["aws_secret_access_key"]
     )
-    s3 = session.resource('s3')
 
     def get_chroma_data(bucket_name, key_prefix):
         s3 = session.resource('s3')
