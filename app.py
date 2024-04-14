@@ -37,6 +37,16 @@ def init_research_assistant():
 
     if "openai_model" not in st.session_state:
         st.session_state["openai_model"] = "gpt-3.5-turbo"
+def download_database(url):
+    local_path = os.path.join(gettempdir(), "chroma.sqlite3")  # Temp path for the database
+    if not os.path.exists(local_path):  # Check if it doesn't already exist
+        response = requests.get(url, stream=True)
+        response.raise_for_status()  # Raise an exception for failed downloads
+        with open(local_path, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+    return local_path
+
 
 load_dotenv()
 def run_research_assistant_chatbot():
@@ -45,7 +55,8 @@ def run_research_assistant_chatbot():
     st.markdown('Your personal Data Anaylist tool ')
     st.divider()
 
-    CHROMA_PATH = "https://chromadump.s3.eu-west-2.amazonaws.com/chroma/*"
+    CHROMA_PATH_URL = "https://chromadump.s3.eu-west-2.amazonaws.com/chroma"
+    CHROMA_PATH = download_database(CHROMA_PATH_URL)
     PROMPT_TEMPLATE = """
     Answer the question based only on the following context:
 
