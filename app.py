@@ -45,7 +45,7 @@ def run_research_assistant_chatbot():
     st.markdown('Your personal Data Anaylist tool ')
     st.divider()
 
-    CHROMA_PATH = "https://pubmedemjess.s3.eu-west-2.amazonaws.com/documents.csv"
+    CHROMA_PATH = "https://pubmeddataemjess.s3.eu-west-2.amazonaws.com/documents.csv"
     PROMPT_TEMPLATE = """
     Answer the question based only on the following context:
 
