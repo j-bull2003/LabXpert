@@ -39,19 +39,6 @@ def init_research_assistant():
         st.session_state["openai_model"] = "gpt-3.5-turbo"
 
 
-import boto3
-
-def get_chroma_data(bucket_name, key_prefix):
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket(bucket_name)
-    chroma_files = []
-    for obj in bucket.objects.filter(Prefix=key_prefix):
-        body = obj.get()['Body'].read()
-        chroma_files.append(body)
-    return chroma_files
-
-# Example usage:
-CHROMA_PATH = get_chroma_data('chromadump', 'chroma/')
 
 
 
@@ -61,7 +48,19 @@ def run_research_assistant_chatbot():
     st.caption('Analyse your experimental data')
     st.markdown('Your personal Data Anaylist tool ')
     st.divider()
+    import boto3
 
+    def get_chroma_data(bucket_name, key_prefix):
+        s3 = boto3.resource('s3')
+        bucket = s3.Bucket(bucket_name)
+        chroma_files = []
+        for obj in bucket.objects.filter(Prefix=key_prefix):
+            body = obj.get()['Body'].read()
+            chroma_files.append(body)
+        return chroma_files
+
+    # Example usage:
+    CHROMA_PATH = get_chroma_data('chromadump', 'chroma/')
     # CHROMA_PATH = "https://chromadump.s3.eu-west-2.amazonaws.com/chroma/"
     PROMPT_TEMPLATE = """
     Answer the question based only on the following context:
