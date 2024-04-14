@@ -56,7 +56,7 @@ def run_research_assistant_chatbot():
     s3 = session.resource('s3')
 
     def get_chroma_data(bucket_name, key_prefix):
-        s3 = boto3.resource('s3')
+        s3 = session.resource('s3')
         bucket = s3.Bucket(bucket_name)
         chroma_files = []
         for obj in bucket.objects.filter(Prefix=key_prefix):
