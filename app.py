@@ -45,7 +45,7 @@ def run_research_assistant_chatbot():
     st.markdown('Your personal Data Anaylist tool ')
     st.divider()
 
-    CHROMA_PATH = "https://chromadump.s3.eu-west-2.amazonaws.com/chroma/"
+    CHROMA_PATH = "https://chromadump.s3.eu-west-2.amazonaws.com/chroma/chroma.sqlite3"
     PROMPT_TEMPLATE = """
     Answer the question based only on the following context:
 
