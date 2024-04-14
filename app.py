@@ -132,7 +132,7 @@ def run_research_assistant_chatbot():
                     sources_formatted = "\n".join(sources) 
                     citations = sources_formatted
                     
-                    response = f" {integrated_response}\n"
+                    response = f"combined: {integrated_response}\n"
             else:
                 context_texts = []
                 sources = []
