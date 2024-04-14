@@ -49,6 +49,11 @@ def run_research_assistant_chatbot():
     st.markdown('Your personal Data Anaylist tool ')
     st.divider()
     import boto3
+    session = boto3.Session(
+        aws_access_key_id=st.secrets["aws_access_key_id"],
+        aws_secret_access_key=st.secrets["aws_secret_access_key"]
+    )
+    s3 = session.resource('s3')
 
     def get_chroma_data(bucket_name, key_prefix):
         s3 = boto3.resource('s3')
