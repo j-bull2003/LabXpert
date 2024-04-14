@@ -12,8 +12,40 @@ from datetime import datetime
 __import__('pysqlite3')
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+import boto3
+from botocore.exceptions import NoCredentialsError
 
+# Setup AWS S3 client
+def setup_s3_client():
+    try:
+        s3_client = boto3.client('s3')
+        return s3_client
+    except NoCredentialsError:
+        st.error("AWS credentials not found.")
+        return None
 
+# Function to handle Chroma data on S3
+class S3Chroma:
+    def __init__(self, bucket_name, s3_client):
+        self.bucket_name = bucket_name
+        s3_client = boto3.client(
+            's3',
+            region_name='eu-west-2',
+            aws_access_key_id=st.secrets["aws_access_key_id"],
+            aws_secret_access_key=st.secrets["aws_secret_access_key"]
+            )
+
+        self.s3_client = s3_client
+
+    def upload_document(self, document_name, content):
+        self.s3_client.put_object(Bucket=self.bucket_name, Key=document_name, Body=content)
+
+    def download_document(self, document_name):
+        response = self.s3_client.get_object(Bucket=self.bucket_name, Key=document_name)
+        return response['Body'].read()
+    
+    
+    
 def init_data_analysis():
     if "messages_data_analysis" not in st.session_state:
         st.session_state.messages_data_analysis = []
@@ -44,8 +76,13 @@ def run_research_assistant_chatbot():
     st.caption('Analyse your experimental data')
     st.markdown('Your personal Data Anaylist tool ')
     st.divider()
+    s3_client = setup_s3_client()
+    if s3_client is None:
+        return  # Stop further execution if no S3 client is available
 
-    CHROMA_PATH = "chroma"
+    CHROMA_PATH = S3Chroma(bucket_name="pubmedemjess", s3_client=s3_client)
+
+    # CHROMA_PATH = "chroma"
     PROMPT_TEMPLATE = """
     Answer the question based only on the following context:
 
