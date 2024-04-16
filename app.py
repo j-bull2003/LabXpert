@@ -62,7 +62,7 @@ def run_research_assistant_chatbot():
     st.caption('Analyse your experimental data')
     st.markdown('Your personal Data Anaylist tool ')
     st.divider()
-    CHROMA_PATH = "https://drive.google.com/uc?export=download&id=1aXR-lXPU2vlBkm-Ry-rIyhHxK-I6MUCe"
+    CHROMA_PATH = "https://drive.google.com/drive/folders/1kCeZmkOFzp0l7rTtXkQG-N4gPnfeTMbr?usp=drive_link"
 
     # CHROMA_PATH = "chroma"
     # CHROMA_PATH = "https://chromadump.s3.eu-west-2.amazonaws.com/chroma/"
