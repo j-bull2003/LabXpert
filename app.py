@@ -58,23 +58,38 @@ def init_research_assistant():
         st.session_state["openai_model"] = "gpt-3.5-turbo"
 
 
-
+import subprocess
 load_dotenv()
 def run_research_assistant_chatbot():
     st.title("Research Assistant 🔬")
     st.caption('Analyse your experimental data')
     st.markdown('Your personal Data Anaylist tool ')
     st.divider()
-    
+    def pull_lfs_files():
+        try:
+            # Pull LFS files to make sure the local copy is updated
+            subprocess.run(["git", "lfs", "pull"], check=True)
+            print("Git LFS files have been pulled successfully.")
+        except subprocess.CalledProcessError:
+            print("Failed to pull LFS files. Make sure you're in a Git repository and Git LFS is setup.")
+
+    def ensure_zip_extracted(zip_path, extract_to):
+        if not os.path.exists(extract_to):
+            if not zipfile.is_zipfile(zip_path):
+                raise FileNotFoundError(f"The file {zip_path} is not a valid ZIP file or is missing.")
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(extract_to)
+            print(f"Files extracted to {extract_to}")
+    pull_lfs_files()
  
     ZIP_FOLDER = 'chroma.zip'
     CHROMA_PATH = 'extracted_folder/chroma/chroma'
     
     # Ensure the ZIP is extracted
-    def ensure_zip_extracted(zip_path, extract_to):
-        if not os.path.exists(extract_to):
-            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                zip_ref.extractall(extract_to)
+    # def ensure_zip_extracted(zip_path, extract_to):
+    #     if not os.path.exists(extract_to):
+    #         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+    #             zip_ref.extractall(extract_to)
 
     ensure_zip_extracted(ZIP_FOLDER, CHROMA_PATH)
     
