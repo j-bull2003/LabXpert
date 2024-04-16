@@ -65,25 +65,34 @@ def run_research_assistant_chatbot():
     st.caption('Analyse your experimental data')
     st.markdown('Your personal Data Anaylist tool ')
     st.divider()
-    def pull_lfs_files():
-        try:
-            # Pull LFS files to make sure the local copy is updated
-            subprocess.run(["git", "lfs", "pull"], check=True)
-            print("Git LFS files have been pulled successfully.")
-        except subprocess.CalledProcessError:
-            print("Failed to pull LFS files. Make sure you're in a Git repository and Git LFS is setup.")
 
-    def ensure_zip_extracted(zip_path, extract_to):
-        if not os.path.exists(extract_to):
-            if not zipfile.is_zipfile(zip_path):
-                raise FileNotFoundError(f"The file {zip_path} is not a valid ZIP file or is missing.")
-            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                zip_ref.extractall(extract_to)
-            print(f"Files extracted to {extract_to}")
-    pull_lfs_files()
- 
-    ZIP_FOLDER = 'chroma.zip'
+
+    import os
+    import requests
+    import zipfile
+    from io import BytesIO
+
+    # Google Drive download link
+    # https://drive.google.com/file/d/1iO8NAOULW6nfWwP_kQwVZOUegkerlDig/view?usp=drive_link
+    ZIP_URL = 'https://drive.google.com/uc?id=1iO8NAOULW6nfWwP_kQwVZOUegkerlDig&export=download'
     CHROMA_PATH = 'extracted_folder/chroma/chroma'
+
+    def download_and_extract_zip(url, extract_to):
+        # Check if the extraction path already exists
+        if not os.path.exists(extract_to):
+            # Send a GET request to the URL
+            response = requests.get(url)
+            # Raise an exception if the download fails
+            response.raise_for_status()
+            
+            # Use BytesIO to handle the zip file in memory
+            with zipfile.ZipFile(BytesIO(response.content), 'r') as zip_ref:
+                # Extract all the contents into the specified directory
+                zip_ref.extractall(extract_to)
+
+    # Call the function with the URL and path
+    download_and_extract_zip(ZIP_URL, CHROMA_PATH)
+
     
     # Ensure the ZIP is extracted
     # def ensure_zip_extracted(zip_path, extract_to):
@@ -91,7 +100,7 @@ def run_research_assistant_chatbot():
     #         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
     #             zip_ref.extractall(extract_to)
 
-    ensure_zip_extracted(ZIP_FOLDER, CHROMA_PATH)
+    # ensure_zip_extracted(ZIP_FOLDER, CHROMA_PATH)
     
 
     PROMPT_TEMPLATE = """
