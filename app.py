@@ -1,3 +1,4 @@
+import zipfile
 import openai
 import time
 import streamlit as st
@@ -62,7 +63,16 @@ import gdown
 url = 'https://drive.google.com/drive/folders/1kCeZmkOFzp0l7rTtXkQG-N4gPnfeTMbr?usp=drive_link'  # Replace FOLDER_ID with the actual ID of the .zip or .tar.gz
 output = 'folder.zip'  # The name of the file to save locally
 gdown.download(url, output, quiet=False)
+ZIP_FOLDER = 'folder.zip'
+CHROMA_PATH = 'extracted_folder'  # Define where you want to extract the contents
 
+# Ensure the ZIP is extracted
+def ensure_zip_extracted(zip_path, extract_to):
+    if not os.path.exists(extract_to):
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_to)
+
+ensure_zip_extracted(ZIP_FOLDER, CHROMA_PATH)
 
 load_dotenv()
 def run_research_assistant_chatbot():
@@ -71,7 +81,7 @@ def run_research_assistant_chatbot():
     st.markdown('Your personal Data Anaylist tool ')
     st.divider()
     # CHROMA_PATH = "https://drive.google.com/drive/folders/1kCeZmkOFzp0l7rTtXkQG-N4gPnfeTMbr?usp=drive_link"
-    CHROMA_PATH='folder.zip'
+    CHROMA_PATH='extracted_folder'
     # CHROMA_PATH = "chroma"
     # CHROMA_PATH = "https://chromadump.s3.eu-west-2.amazonaws.com/chroma/"
     PROMPT_TEMPLATE = """
