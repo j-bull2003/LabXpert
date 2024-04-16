@@ -14,6 +14,22 @@ __import__('pysqlite3')
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
+import spacy
+
+# Load a language model (you might need to download it first with spacy download en_core_web_sm)
+nlp = spacy.load("en_core_web_sm")
+
+def estimate_complexity(question):
+    doc = nlp(question.lower())
+    complex_keywords = {'design', 'experiment', 'research', 'contrast', 'details', 'theory', 'mechanism'}
+    complexity_score = sum(1 for token in doc if token.lemma_ in complex_keywords)
+    
+    if complexity_score >= 2:
+        return 10  # Higher complexity
+    elif complexity_score == 1:
+        return 5   # Moderate complexity
+    else:
+        return 3   # Lower complexity
 
 def init_data_analysis():
     if "messages_data_analysis" not in st.session_state:
@@ -95,14 +111,19 @@ def run_research_assistant_chatbot():
         db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
         chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
         prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
-        results = db.similarity_search_with_relevance_scores(prompt_with_history, k=3)
+
+        # Estimate k based on the complexity of the question
+        k = estimate_complexity(prompt)
+
+        results = db.similarity_search_with_relevance_scores(prompt_with_history, k=k)
         with st.spinner("Thinking..."):
             if len(results) == 0 or results[0][1] < 0.9:
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
                 # query the assistant here instead
                 response_text = model.predict(prompt_with_history)      
                 response = f" {response_text}"
-                follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
+                a = estimate_complexity(response_text)
+                follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=a)
                 very_strong_correlation_threshold = 0.8
                 high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
                 if high_scoring_results:
@@ -123,7 +144,6 @@ def run_research_assistant_chatbot():
                         )
                         sources.append(source_info)
                     combined_input = " ".join(combined_texts)
-                    # query_for_llm = f"{combined_input} Answer the question with citation to the paragraphs. For every sentence you write, cite the book name and paragraph number as (author, year). At the end of your commentary, suggest a further question that can be answered by the paragraphs provided."
                     query_for_llm = (
                         f"Answer the question with citations to each sentence:\n{combined_input}\n\n"
                         f"Question: {prompt}\n\n"
@@ -131,7 +151,7 @@ def run_research_assistant_chatbot():
                         f"If it is an experimental design question, Suggest a further question/experiment that relates, and cite them as (author, year): {combined_input}"
                     )
                     integrated_response = model.predict(query_for_llm)
-                    sources_formatted = "\n".join(sources) 
+                    sources_formatted = "\n".join(sources)
                     citations = sources_formatted
                     
                     response = f"{integrated_response}\n"
