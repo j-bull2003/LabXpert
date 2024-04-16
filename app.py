@@ -66,6 +66,7 @@ def run_research_assistant_chatbot():
     st.divider()
 
     # CHROMA_PATH = "https://chromadump.s3.eu-west-2.amazonaws.com/chroma/"
+    CHROMA_PATH = "chroma"
     PROMPT_TEMPLATE = """
     Answer the question based only on the following context:
 
