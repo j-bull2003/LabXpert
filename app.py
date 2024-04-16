@@ -10,15 +10,6 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.chat_models import ChatOpenAI
 from datetime import datetime
 
-import boto3
-import shelve
-import streamlit as st
-from io import BytesIO
-import tempfile
-import os
-
-
-
 __import__('pysqlite3')
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
@@ -54,21 +45,8 @@ def run_research_assistant_chatbot():
     st.caption('Analyse your experimental data')
     st.markdown('Your personal Data Anaylist tool ')
     st.divider()
-    s3 = boto3.client('s3',
-                      aws_access_key_id=st.secrets["aws_access_key_id"],
-                      aws_secret_access_key=st.secrets["aws_secret_access_key"])
-    bucket_name = 'chromadump'  # Replace with your actual S3 bucket name
-    key = 'chroma/'    # Replace with your actual file path in S3
 
-    def download_chroma_db():
-        """Download Chroma DB from S3 and return the local path to the file."""
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            s3.download_fileobj(bucket_name, key, tmp)
-            return tmp.name
-
-    # If you are running this in a Streamlit app, this download should likely happen
-    # during setup or as a one-time operation unless the DB updates regularly.
-    CHROMA_PATH = download_chroma_db()
+    CHROMA_PATH = "chroma"
     # CHROMA_PATH = "https://chromadump.s3.eu-west-2.amazonaws.com/chroma/"
     PROMPT_TEMPLATE = """
     Answer the question based only on the following context:
