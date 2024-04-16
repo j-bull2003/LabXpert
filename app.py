@@ -56,14 +56,22 @@ def init_research_assistant():
     if "openai_model" not in st.session_state:
         st.session_state["openai_model"] = "gpt-3.5-turbo"
 
+
+import gdown
+
+url = 'https://drive.google.com/drive/folders/1kCeZmkOFzp0l7rTtXkQG-N4gPnfeTMbr?usp=drive_link'  # Replace FOLDER_ID with the actual ID of the .zip or .tar.gz
+output = 'folder.zip'  # The name of the file to save locally
+gdown.download(url, output, quiet=False)
+
+
 load_dotenv()
 def run_research_assistant_chatbot():
     st.title("Research Assistant 🔬")
     st.caption('Analyse your experimental data')
     st.markdown('Your personal Data Anaylist tool ')
     st.divider()
-    CHROMA_PATH = "https://drive.google.com/drive/folders/1kCeZmkOFzp0l7rTtXkQG-N4gPnfeTMbr?usp=drive_link"
-
+    # CHROMA_PATH = "https://drive.google.com/drive/folders/1kCeZmkOFzp0l7rTtXkQG-N4gPnfeTMbr?usp=drive_link"
+    CHROMA_PATH='folder.zip'
     # CHROMA_PATH = "chroma"
     # CHROMA_PATH = "https://chromadump.s3.eu-west-2.amazonaws.com/chroma/"
     PROMPT_TEMPLATE = """
