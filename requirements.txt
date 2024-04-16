@@ -9,5 +9,3 @@ pysqlite3-binary
 tiktoken
 openai==1.2.2
 boto3
-spacy
-en-core-web-sm==3.7.1
