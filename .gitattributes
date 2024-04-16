@@ -1,4 +1,4 @@
 *.bin filter=lfs diff=lfs merge=lfs -text
 *.pickle filter=lfs diff=lfs merge=lfs -text
 *.sqlite3 filter=lfs diff=lfs merge=lfs -text
-# *.txt filter=lfs diff=lfs merge=lfs -text
+existing_ids3.txt filter=lfs diff=lfs merge=lfs -text
