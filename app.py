@@ -58,8 +58,6 @@ def init_research_assistant():
         st.session_state["openai_model"] = "gpt-3.5-turbo"
 
 
-import gdown
-
 
 load_dotenv()
 def run_research_assistant_chatbot():
@@ -70,8 +68,8 @@ def run_research_assistant_chatbot():
     
  
     ZIP_FOLDER = 'chroma.zip'
-    CHROMA_PATH = 'extracted_folder'  # Define where you want to extract the contents
-
+    CHROMA_PATH = 'extracted_folder/chroma/chroma'
+    
     # Ensure the ZIP is extracted
     def ensure_zip_extracted(zip_path, extract_to):
         if not os.path.exists(extract_to):
@@ -80,11 +78,7 @@ def run_research_assistant_chatbot():
 
     ensure_zip_extracted(ZIP_FOLDER, CHROMA_PATH)
     
-    
-    # CHROMA_PATH = "https://drive.google.com/drive/folders/1kCeZmkOFzp0l7rTtXkQG-N4gPnfeTMbr?usp=drive_link"
-    CHROMA_PATH='extracted_folder'
-    # CHROMA_PATH = "chroma"
-    # CHROMA_PATH = "https://chromadump.s3.eu-west-2.amazonaws.com/chroma/"
+
     PROMPT_TEMPLATE = """
     Answer the question based only on the following context:
 
@@ -253,7 +247,7 @@ def run_research_assistant_chatbot():
 
 
 import io
-from openai import OpenAI
+# from openai import OpenAI
 
 import streamlit as st
 import pandas as pd
@@ -266,20 +260,6 @@ import json
 from PIL import Image
 def run_data_analysis_chatbot():
     st.title("Lab Assistant 📊")
-    class CustomOpenAIEmbeddings(OpenAIEmbeddings):
-        def __init__(self, openai_api_key, *args, **kwargs):
-            super().__init__(openai_api_key=openai_api_key, *args, **kwargs)
-            
-        def _embed_documents(self, texts):
-            return super().embed_documents(texts)
-
-        def __call__(self, input):
-            return self._embed_documents(input)
-    CHROMA_PATH = "https://pubmedemjess.s3.eu-west-2.amazonaws.com/documents.csv"
-    openai_api_key = st.secrets["OPENAI_API_KEY"]
-    embedding_function = CustomOpenAIEmbeddings(openai_api_key=openai_api_key)
-    vector_database = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
-    
     def init():
         if "messages" not in st.session_state:
             st.session_state.messages = []
