@@ -14,7 +14,24 @@ __import__('pysqlite3')
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
   # Lower complexity
-
+def estimate_complexity(question):
+    # List of complex keywords
+    complex_keywords = ['design', 'experiment', 'compare', 'contrast', 'details', 'theory', 'mechanism', 'evaluate', 'discuss', 'analyze']
+    
+    # Convert the question to lower case to ensure case-insensitive matching
+    question_lower = question.lower()
+    
+    # Count the occurrences of each complex keyword
+    complexity_score = sum(question_lower.count(keyword) for keyword in complex_keywords)
+    
+    # Determine k based on the complexity score
+    if complexity_score >= 2:
+        return 10  # High complexity
+    elif complexity_score == 1:
+        return 5   # Moderate complexity
+    else:
+        return 3  
+    
 def init_data_analysis():
     if "messages_data_analysis" not in st.session_state:
         st.session_state.messages_data_analysis = []
@@ -95,14 +112,16 @@ def run_research_assistant_chatbot():
         db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
         chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
         prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
-        results = db.similarity_search_with_relevance_scores(prompt_with_history, k=3)
+        k = estimate_complexity(prompt)
+        results = db.similarity_search_with_relevance_scores(prompt_with_history, k=k)
         with st.spinner("Thinking..."):
             if len(results) == 0 or results[0][1] < 0.9:
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
                 # query the assistant here instead
                 response_text = model.predict(prompt_with_history)      
                 response = f" {response_text}"
-                follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=3)
+                a = estimate_complexity(response_text)
+                follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=a)
                 very_strong_correlation_threshold = 0.8
                 high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
                 if high_scoring_results:
