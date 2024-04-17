@@ -73,7 +73,7 @@ def run_research_assistant_chatbot():
     from io import BytesIO
     import re
 
-    ZIP_URL = 'https://drive.usercontent.google.com/download?id=1iO8NAOULW6nfWwP_kQwVZOUegkerlDig&export=download&authuser=0'
+    ZIP_URL = 'https://drive.usercontent.google.com/download?id=1iO8NAOULW6nfWwP_kQwVZOUegkerlDig&export=download&authuser=0&confirm=t&uuid=fe14b4e1-2c0b-4d4f-b312-085e19f4eddf&at=APZUnTU63Vu18T0v-kjSfd-jxXy5%3A1713340767172'
     CHROMA_PATH = 'extracted_folder/chroma/chroma'
 
     def download_and_extract_zip(url, extract_to):
