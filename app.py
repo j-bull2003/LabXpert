@@ -69,50 +69,51 @@ def run_research_assistant_chatbot():
     
 
     # List of files and their GCS paths
-    CHROMA = [
-    "https://storage.googleapis.com/chromaproto/chroma.sqlite3",
-    "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/data_level0.bin",
-    "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/header.bin",
-    "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/index_metadata.pickle",
-    "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/length.bin",
-    "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/link_lists.bin",
-]
+#     CHROMA = [
+#     "https://storage.googleapis.com/chromaproto/chroma.sqlite3",
+#     "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/data_level0.bin",
+#     "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/header.bin",
+#     "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/index_metadata.pickle",
+#     "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/length.bin",
+#     "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/link_lists.bin",
+# ]
 
-    def download_files(urls, target_folder):
-        # Ensure the base target folder exists
-        os.makedirs(target_folder, exist_ok=True)
+#     def download_files(urls, target_folder):
+#         # Ensure the base target folder exists
+#         os.makedirs(target_folder, exist_ok=True)
         
-        # Iterate over each URL
-        for url in urls:
-            # Extract the full path segments from the URL
-            path_segments = url.split('/')[3:]  # This skips the 'https://' part and domain name
-            subdirectory_path = os.path.join(target_folder, *path_segments[:-1])
+#         # Iterate over each URL
+#         for url in urls:
+#             # Extract the full path segments from the URL
+#             path_segments = url.split('/')[3:]  # This skips the 'https://' part and domain name
+#             subdirectory_path = os.path.join(target_folder, *path_segments[:-1])
             
-            # Ensure the target subdirectory exists
-            os.makedirs(subdirectory_path, exist_ok=True)
+#             # Ensure the target subdirectory exists
+#             os.makedirs(subdirectory_path, exist_ok=True)
             
-            # Full path for the file to be saved
-            file_path = os.path.join(subdirectory_path, path_segments[-1])
+#             # Full path for the file to be saved
+#             file_path = os.path.join(subdirectory_path, path_segments[-1])
             
-            # Check if the file already exists
-            if os.path.exists(file_path):
-                print(f'Using cached file {file_path}')
-            else:
-                # Download and save the file if not present
-                response = requests.get(url)
-                if response.status_code == 200:
-                    with open(file_path, 'wb') as file:
-                        file.write(response.content)
-                    print(f'Downloaded {path_segments[-1]} to {file_path}')
-                else:
-                    print(f'Failed to download {path_segments[-1]} with status code {response.status_code}')
+#             # Check if the file already exists
+#             if os.path.exists(file_path):
+#                 print(f'Using cached file {file_path}')
+#             else:
+#                 # Download and save the file if not present
+#                 response = requests.get(url)
+#                 if response.status_code == 200:
+#                     with open(file_path, 'wb') as file:
+#                         file.write(response.content)
+#                     print(f'Downloaded {path_segments[-1]} to {file_path}')
+#                 else:
+#                     print(f'Failed to download {path_segments[-1]} with status code {response.status_code}')
 
-    # Directory where the files will be saved
-    target_directory = 'chromaproto'
+#     # Directory where the files will be saved
+#     target_directory = 'chromaproto'
 
-    # Call the function to download the files
-    download_files(CHROMA, target_directory)
-    CHROMA_PATH = 'chromaproto/chromaproto'
+#     # Call the function to download the files
+#     download_files(CHROMA, target_directory)
+#     CHROMA_PATH = 'chromaproto/chromaproto'
+    CHROMA_PATH = 'chroma'
 
 
 
