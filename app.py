@@ -78,21 +78,8 @@ def run_research_assistant_chatbot():
 
     def download_and_extract_zip(url, extract_to):
         if not os.path.exists(extract_to):
-            session = requests.Session()
-            response = session.get(url, stream=True)
+            response = requests.get(url, stream=True)
             response.raise_for_status()
-
-            # Check if the page asks for download confirmation (common with large files)
-            if 'text/html' in response.headers.get('Content-Type', ''):
-                # Look for a confirmation token in the HTML response
-                html_content = response.text
-                match = re.search(r'confirm=([0-9A-Za-z_]+)', html_content)
-                if match:
-                    token = match.group(1)
-                    # Modify the URL to include the confirmation token, then re-request
-                    url += '&confirm=' + token
-                    response = session.get(url, stream=True)
-                    response.raise_for_status()
 
             # Assuming we now have the correct response containing the zip file
             with zipfile.ZipFile(BytesIO(response.content), 'r') as zip_ref:
