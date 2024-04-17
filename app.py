@@ -113,7 +113,6 @@ def run_research_assistant_chatbot():
 #     # Call the function to download the files
 #     download_files(CHROMA, target_directory)
 #     CHROMA_PATH = 'chromaproto/chromaproto'
-    CHROMA_PATH = 'chroma'
 
 
 
@@ -195,6 +194,7 @@ def run_research_assistant_chatbot():
 
         def __call__(self, input):
             return self._embed_documents(input)
+    CHROMA_PATH = "chroma"
     def formulate_response(prompt):
         citations = ""
         openai_api_key = os.environ["OPENAI_API_KEY"]
@@ -588,7 +588,7 @@ def run_data_analysis_chatbot():
         print(st.session_state.file_ids)
 
 def main():
-    st.sidebar.title("Science.ai")
+    st.sidebar.title("LabXpert")
     chatbot_mode = st.sidebar.radio("Choose an AI to assistant you:", ('Data Analysis 📊', 'Research Assistant 🔬'))
     
     if chatbot_mode == 'Data Analysis 📊':
