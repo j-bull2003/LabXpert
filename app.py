@@ -137,7 +137,7 @@ def run_research_assistant_chatbot():
             return self._embed_documents(input)
     def formulate_response(prompt):
         citations = ""
-        openai_api_key = st.secrets["OPENAI_API_KEY"]
+        openai_api_key = os.environ["OPENAI_API_KEY"]
         embedding_function = CustomOpenAIEmbeddings(openai_api_key=openai_api_key)
         db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
         chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
@@ -294,7 +294,7 @@ def run_data_analysis_chatbot():
         # st.sidebar.markdown('This AI Lab Assistant is design to analyse scientific data.')
         # st.sidebar.header('Configure')
         # api_key = st.sidebar.text_input("Enter your OpenAI API key", type="password")
-        api_key = st.secrets["OPENAI_API_KEY"]
+        api_key = os.environ["OPENAI_API_KEY"]
         return api_key
         
 
