@@ -71,7 +71,6 @@ def run_research_assistant_chatbot():
     import requests
     import zipfile
     from io import BytesIO
-    import re
 
     ZIP_URL = 'https://drive.usercontent.google.com/download?id=1iO8NAOULW6nfWwP_kQwVZOUegkerlDig&export=download&authuser=0&confirm=t&uuid=fe14b4e1-2c0b-4d4f-b312-085e19f4eddf&at=APZUnTU63Vu18T0v-kjSfd-jxXy5%3A1713340767172'
     CHROMA = 'extracted_folder/'
@@ -81,7 +80,6 @@ def run_research_assistant_chatbot():
             response = requests.get(url, stream=True)
             response.raise_for_status()
 
-            # Assuming we now have the correct response containing the zip file
             with zipfile.ZipFile(BytesIO(response.content), 'r') as zip_ref:
                 zip_ref.extractall(extract_to)
 
