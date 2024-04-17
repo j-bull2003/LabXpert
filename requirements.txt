@@ -8,3 +8,4 @@ chromadb
 pysqlite3-binary
 tiktoken
 openai==1.2.2
+BeautifulSoup
