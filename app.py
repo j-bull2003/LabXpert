@@ -71,7 +71,7 @@ def run_research_assistant_chatbot():
     import requests
     import zipfile
     from io import BytesIO
-    from bs4 import BeautifulSoup 
+    import re
 
     # Google Drive download link
     # https://drive.google.com/file/d/1iO8NAOULW6nfWwP_kQwVZOUegkerlDig/view?usp=drive_link
@@ -84,16 +84,17 @@ def run_research_assistant_chatbot():
             response = session.get(url, stream=True)
             response.raise_for_status()
 
-            # Attempt to find a confirmation token in the response
+            # Check if the page asks for download confirmation (common with large files)
             if 'text/html' in response.headers.get('Content-Type', ''):
-                soup = BeautifulSoup(response.content, 'html.parser')
-                tag = soup.find('a', id='uc-download-link')
-                if tag:
-                    # A download warning is detected, a secondary request is necessary
-                    link = tag.get('href')
-                    if link:
-                        response = session.get('https://drive.google.com' + link, stream=True)
-                        response.raise_for_status()
+                # Look for a confirmation token in the HTML response
+                html_content = response.text
+                match = re.search(r'confirm=([0-9A-Za-z_]+)', html_content)
+                if match:
+                    token = match.group(1)
+                    # Modify the URL to include the confirmation token, then re-request
+                    url += '&confirm=' + token
+                    response = session.get(url, stream=True)
+                    response.raise_for_status()
 
             # Assuming we now have the correct response containing the zip file
             with zipfile.ZipFile(BytesIO(response.content), 'r') as zip_ref:
