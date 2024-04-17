@@ -73,14 +73,14 @@ def run_research_assistant_chatbot():
     from io import BytesIO
     import re
 
-    Z    CHROMA = [
+    CHROMA = [
     "https://storage.googleapis.com/chromaproto/chroma.sqlite3",
     "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/data_level0.bin",
     "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/header.bin",
     "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/index_metadata.pickle",
     "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/length.bin",
     "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/link_lists.bin",
-]
+    ]
 
     def download_files(urls, target_folder):
         # Ensure the base target folder exists
