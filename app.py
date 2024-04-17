@@ -11,6 +11,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.chat_models import ChatOpenAI
 from datetime import datetime
 
+
 # __import__('pysqlite3')
 # import sys
 # sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
@@ -65,26 +66,84 @@ def run_research_assistant_chatbot():
     st.caption('Analyse your experimental data')
     st.markdown('Your personal Data Anaylist tool ')
     st.divider()
+    
+
+    # List of files and their GCS paths
+    CHROMA = [
+    "https://storage.googleapis.com/chromaproto/chroma.sqlite3",
+    "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/data_level0.bin",
+    "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/header.bin",
+    "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/index_metadata.pickle",
+    "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/length.bin",
+    "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/link_lists.bin",
+]
+
+    def download_files(urls, target_folder):
+        # Ensure the base target folder exists
+        os.makedirs(target_folder, exist_ok=True)
+        
+        # Iterate over each URL
+        for url in urls:
+            # Extract the full path segments from the URL
+            path_segments = url.split('/')[3:]  # This skips the 'https://' part and domain name
+            subdirectory_path = os.path.join(target_folder, *path_segments[:-1])
+            
+            # Ensure the target subdirectory exists
+            os.makedirs(subdirectory_path, exist_ok=True)
+            
+            # Full path for the file to be saved
+            file_path = os.path.join(subdirectory_path, path_segments[-1])
+            
+            # Check if the file already exists
+            if os.path.exists(file_path):
+                print(f'Using cached file {file_path}')
+            else:
+                # Download and save the file if not present
+                response = requests.get(url)
+                if response.status_code == 200:
+                    with open(file_path, 'wb') as file:
+                        file.write(response.content)
+                    print(f'Downloaded {path_segments[-1]} to {file_path}')
+                else:
+                    print(f'Failed to download {path_segments[-1]} with status code {response.status_code}')
+
+    # Directory where the files will be saved
+    target_directory = 'chromaproto'
+
+    # Call the function to download the files
+    download_files(CHROMA, target_directory)
+    CHROMA_PATH = 'chromaproto/chromaproto'
 
 
-    import os
-    import requests
-    import zipfile
-    from io import BytesIO
 
-    ZIP_URL = 'https://drive.usercontent.google.com/download?id=1iO8NAOULW6nfWwP_kQwVZOUegkerlDig&export=download&authuser=0&confirm=t&uuid=fe14b4e1-2c0b-4d4f-b312-085e19f4eddf&at=APZUnTU63Vu18T0v-kjSfd-jxXy5%3A1713340767172'
-    CHROMA = 'extracted_folder/'
 
-    def download_and_extract_zip(url, extract_to):
-        if not os.path.exists(extract_to):
-            response = requests.get(url, stream=True)
-            response.raise_for_status()
+    
+    # CHROMA_PATH = "https://storage.googleapis.com/storage/chromaproto/chroma.sqlite3"
+    # "https://storage.googleapis.com/storage/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/data_level0.bin"
+    # "https://storage.googleapis.com/storage/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/header.bin"
+    # "https://storage.googleapis.com/storage/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/index_metadata.pickle"
+    # "https://storage.googleapis.com/storage/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/length.bin"
+    # "https://storage.googleapis.com/storage/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/link_lists.bin"
 
-            with zipfile.ZipFile(BytesIO(response.content), 'r') as zip_ref:
-                zip_ref.extractall(extract_to)
+    # https://storage.googleapis.com/storage/chromaproto/chroma.sqlite3
+    # import os
+    # import requests
+    # import zipfile
+    # from io import BytesIO
 
-    download_and_extract_zip(ZIP_URL, CHROMA)
-    CHROMA_PATH = 'extracted_folder/chroma'
+    # ZIP_URL = 'https://drive.usercontent.google.com/download?id=1iO8NAOULW6nfWwP_kQwVZOUegkerlDig&export=download&authuser=0&confirm=t&uuid=fe14b4e1-2c0b-4d4f-b312-085e19f4eddf&at=APZUnTU63Vu18T0v-kjSfd-jxXy5%3A1713340767172'
+    # CHROMA = 'extracted_folder/'
+
+    # def download_and_extract_zip(url, extract_to):
+    #     if not os.path.exists(extract_to):
+    #         response = requests.get(url, stream=True)
+    #         response.raise_for_status()
+
+    #         with zipfile.ZipFile(BytesIO(response.content), 'r') as zip_ref:
+    #             zip_ref.extractall(extract_to)
+
+    # download_and_extract_zip(ZIP_URL, CHROMA)
+    # CHROMA_PATH = 'extracted_folder/chroma'
     
     # Ensure the ZIP is extracted
     # def ensure_zip_extracted(zip_path, extract_to):
