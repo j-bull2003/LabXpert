@@ -74,7 +74,7 @@ def run_research_assistant_chatbot():
     import re
 
     ZIP_URL = 'https://drive.usercontent.google.com/download?id=1iO8NAOULW6nfWwP_kQwVZOUegkerlDig&export=download&authuser=0&confirm=t&uuid=fe14b4e1-2c0b-4d4f-b312-085e19f4eddf&at=APZUnTU63Vu18T0v-kjSfd-jxXy5%3A1713340767172'
-    CHROMA_PATH = 'extracted_folder/'
+    CHROMA = 'extracted_folder/'
 
     def download_and_extract_zip(url, extract_to):
         if not os.path.exists(extract_to):
@@ -85,7 +85,7 @@ def run_research_assistant_chatbot():
             with zipfile.ZipFile(BytesIO(response.content), 'r') as zip_ref:
                 zip_ref.extractall(extract_to)
 
-    download_and_extract_zip(ZIP_URL, CHROMA_PATH)
+    download_and_extract_zip(ZIP_URL, CHROMA)
     CHROMA_PATH = 'extracted_folder/chroma'
     
     # Ensure the ZIP is extracted
