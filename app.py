@@ -71,39 +71,35 @@ def run_research_assistant_chatbot():
     import requests
     import zipfile
     from io import BytesIO
+    from bs4 import BeautifulSoup 
 
     # Google Drive download link
     # https://drive.google.com/file/d/1iO8NAOULW6nfWwP_kQwVZOUegkerlDig/view?usp=drive_link
-    ZIP_URL = 'https://drive.usercontent.google.com/download?id=1iO8NAOULW6nfWwP_kQwVZOUegkerlDig&export=download&authuser=0'
+    ZIP_URL = 'https://drive.google.com/uc?export=download&id=1iO8NAOULW6nfWwP_kQwVZOUegkerlDig'
     CHROMA_PATH = 'extracted_folder/chroma/chroma'
 
     def download_and_extract_zip(url, extract_to):
         if not os.path.exists(extract_to):
             session = requests.Session()
-            
-            # Make the initial request to get the download token if required
             response = session.get(url, stream=True)
-            for key, value in response.cookies.items():
-                if key.startswith('download_warning'):
-                    # A download warning cookie was sent
-                    token = value
-                    # Append the confirm token to the URL and make another request
-                    url += '&confirm=' + token
-                    response = session.get(url, stream=True)
-                    break
-            
-            # Check if the content is actually a zip file
             response.raise_for_status()
-            content_type = response.headers.get('Content-Type')
-            if 'application/zip' not in content_type:
-                raise ValueError("The file is not recognized as a zip file by content type: " + content_type)
-            
-            # Proceed to extract the file
+
+            # Attempt to find a confirmation token in the response
+            if 'text/html' in response.headers.get('Content-Type', ''):
+                soup = BeautifulSoup(response.content, 'html.parser')
+                tag = soup.find('a', id='uc-download-link')
+                if tag:
+                    # A download warning is detected, a secondary request is necessary
+                    link = tag.get('href')
+                    if link:
+                        response = session.get('https://drive.google.com' + link, stream=True)
+                        response.raise_for_status()
+
+            # Assuming we now have the correct response containing the zip file
             with zipfile.ZipFile(BytesIO(response.content), 'r') as zip_ref:
                 zip_ref.extractall(extract_to)
 
     download_and_extract_zip(ZIP_URL, CHROMA_PATH)
-
     
     # Ensure the ZIP is extracted
     # def ensure_zip_extracted(zip_path, extract_to):
