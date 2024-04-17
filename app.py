@@ -78,19 +78,30 @@ def run_research_assistant_chatbot():
     CHROMA_PATH = 'extracted_folder/chroma/chroma'
 
     def download_and_extract_zip(url, extract_to):
-        # Check if the extraction path already exists
         if not os.path.exists(extract_to):
-            # Send a GET request to the URL
-            response = requests.get(url)
-            # Raise an exception if the download fails
-            response.raise_for_status()
+            session = requests.Session()
             
-            # Use BytesIO to handle the zip file in memory
+            # Make the initial request to get the download token if required
+            response = session.get(url, stream=True)
+            for key, value in response.cookies.items():
+                if key.startswith('download_warning'):
+                    # A download warning cookie was sent
+                    token = value
+                    # Append the confirm token to the URL and make another request
+                    url += '&confirm=' + token
+                    response = session.get(url, stream=True)
+                    break
+            
+            # Check if the content is actually a zip file
+            response.raise_for_status()
+            content_type = response.headers.get('Content-Type')
+            if 'application/zip' not in content_type:
+                raise ValueError("The file is not recognized as a zip file by content type: " + content_type)
+            
+            # Proceed to extract the file
             with zipfile.ZipFile(BytesIO(response.content), 'r') as zip_ref:
-                # Extract all the contents into the specified directory
                 zip_ref.extractall(extract_to)
 
-    # Call the function with the URL and path
     download_and_extract_zip(ZIP_URL, CHROMA_PATH)
 
     
