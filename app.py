@@ -590,13 +590,12 @@ def run_data_analysis_chatbot():
 def main():
     st.sidebar.title("LabXpert")
     chatbot_mode = st.sidebar.radio("Select an AI Xpert", ('Data Analysis 📊', 'Research Xpert 🔬'))
-    
-    if chatbot_mode == 'Data Analysis 📊':
-        init_data_analysis()
-        run_data_analysis_chatbot()
-    elif chatbot_mode == 'Research Xpert 🔬':
+    if chatbot_mode == 'Research Xpert 🔬':
         init_research_assistant()
         run_research_assistant_chatbot()
+    elif chatbot_mode == 'Data Analysis 📊':
+        init_data_analysis()
+        run_data_analysis_chatbot()
 
 if __name__ == '__main__':
     main()
