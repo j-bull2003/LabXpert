@@ -62,9 +62,9 @@ def init_research_assistant():
 import subprocess
 load_dotenv()
 def run_research_assistant_chatbot():
-    st.title("Research Assistant 🔬")
-    st.caption('Analyse your experimental data')
-    st.markdown('Your personal Data Anaylist tool ')
+    st.title("Research Xpert 🔬")
+    st.caption('Ask questions about REAL scientific articles')
+    st.markdown('Enjoy fully cited responses, Harvard style.')
     st.divider()
     
 
@@ -335,7 +335,7 @@ import csv
 import json
 from PIL import Image
 def run_data_analysis_chatbot():
-    st.title("Lab Assistant 📊")
+    st.title("Data Xpert 📊")
     def init():
         if "messages" not in st.session_state:
             st.session_state.messages = []
@@ -589,12 +589,12 @@ def run_data_analysis_chatbot():
 
 def main():
     st.sidebar.title("LabXpert")
-    chatbot_mode = st.sidebar.radio("Choose an AI to assistant you:", ('Data Analysis 📊', 'Research Assistant 🔬'))
+    chatbot_mode = st.sidebar.radio("Select an AI Xpert", ('Data Analysis 📊', 'Research Xpert 🔬'))
     
     if chatbot_mode == 'Data Analysis 📊':
         init_data_analysis()
         run_data_analysis_chatbot()
-    elif chatbot_mode == 'Research Assistant 🔬':
+    elif chatbot_mode == 'Research Xpert 🔬':
         init_research_assistant()
         run_research_assistant_chatbot()
 
