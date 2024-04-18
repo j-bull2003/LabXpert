@@ -15,24 +15,34 @@ from datetime import datetime
 __import__('pysqlite3')
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-  # Lower complexity
+
 def estimate_complexity(question):
-    # List of complex keywords
-    complex_keywords = ['design', 'experiment', 'compare', 'contrast', 'details', 'theory', 'mechanism', 'evaluate', 'discuss', 'analyze']
+    # List of simpler words
+    simple_words = ['ask', 'know', 'name', 'show', 'list', 'tell', 'define', 'what', 'who', 'where']
+
+    # List of difficult words
+    difficult_words = ['design', 'experiment', 'compare', 'contrast', 'details', 'theory', 'research', 'evaluate', 'discuss', 'analyze']
     
-    # Convert the question to lower case to ensure case-insensitive matching
+    # Make the question lowercase to match words correctly without case issues
     question_lower = question.lower()
     
-    # Count the occurrences of each complex keyword
-    complexity_score = sum(question_lower.count(keyword) for keyword in complex_keywords)
+    # Count the occurrences of each simple word
+    simple_score = sum(question_lower.count(word) for word in simple_words)
+
+    # Count the occurrences of each difficult word
+    difficult_score = sum(question_lower.count(word) for word in difficult_words)
     
-    # Determine k based on the complexity score
-    if complexity_score >= 2:
+    # Total complexity score, considering both simple and difficult words
+    complexity_score = difficult_score * 2 - simple_score  # Weight difficult words more
+
+    # Decide the complexity level based on the complexity score
+    if complexity_score > 5:
         return 10  # High complexity
-    elif complexity_score == 1:
+    elif complexity_score > 0:
         return 5   # Moderate complexity
     else:
-        return 3  
+        return 3   # Low complexity
+  
     
 def init_data_analysis():
     if "messages_data_analysis" not in st.session_state:
