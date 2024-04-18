@@ -563,8 +563,8 @@ def run_data_analysis_chatbot():
                         st.markdown(content)
 
     def main():
-        st.caption('Analyse your experimental data')
-        st.markdown('Your personal Data Anaylist tool ')
+        st.caption('Upload your data file/s and I can produce graphs from your experiment')
+        st.markdown('Your data analyse Xpert!')
         st.divider()
         api_key = set_apikey()
         if api_key:
