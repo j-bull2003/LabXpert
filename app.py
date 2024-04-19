@@ -248,7 +248,7 @@ def run_research_assistant_chatbot():
                         f"Answer the question with citations to each sentence:\n{combined_input}\n\n"
                         f"Question: {prompt}\n\n"
                         "Please answer the question directly with a lot of extra detail, citing relevant sections (author, year) for support. Everything that is taken word for word from a source should be in quotation marks."
-                        f"If it is an experimental design question, Suggest a further question/experiment that relates, and cite them as (author, year): {combined_input}"
+                        f"If it is an experimental design question, Suggest a further question/experiment that relates, cite it: {combined_input}"
                     )
                     integrated_response = model.predict(query_for_llm)
                     sources_formatted = "\n".join(sources) 
