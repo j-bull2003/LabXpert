@@ -72,7 +72,7 @@ def init_research_assistant():
 import subprocess
 load_dotenv()
 def run_research_assistant_chatbot():
-    st.title("ResearchXpert 📄")
+    st.title("Research Xpert 📄")
     st.caption('Ask questions about REAL scientific articles')
     st.markdown('Enjoy fully cited responses, Harvard style.')
     st.divider()
@@ -346,7 +346,7 @@ import csv
 import json
 from PIL import Image
 def run_data_analysis_chatbot():
-    st.title("DataXpert 📊")
+    st.title("Data Xpert 📊")
     def init():
         if "messages" not in st.session_state:
             st.session_state.messages = []
@@ -603,11 +603,11 @@ def main():
     st.caption("Copyright © 2024 LabXpert, Inc. All rights reserved.")
     st.sidebar.title("LabXpert 🧬")
     # Set 'Research Xpert 🔬' as the default selected option
-    chatbot_mode = st.sidebar.radio("Select an AIXpert", ('ResearchXpert 📄', 'DataXpert 📊'), index=0)
-    if chatbot_mode == 'ResearchXpert 📄':
+    chatbot_mode = st.sidebar.radio("Select an AI Xpert", ('Research Xpert 📄', 'Data Xpert 📊'), index=0)
+    if chatbot_mode == 'Research Xpert 📄':
         init_research_assistant()
         run_research_assistant_chatbot()
-    elif chatbot_mode == 'DataXpert 📊':
+    elif chatbot_mode == 'Data Xpert 📊':
         init_data_analysis()
         run_data_analysis_chatbot()
 
