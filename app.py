@@ -599,7 +599,7 @@ def run_data_analysis_chatbot():
         print(st.session_state.file_ids)
 
 def main():
-    st.sidebar.title("LabXpert")
+    st.sidebar.title("LabXpert 🧬")
     # Set 'Research Xpert 🔬' as the default selected option
     chatbot_mode = st.sidebar.radio("Select an AI Xpert", ('Research Xpert 📄', 'Data Analysis 📊'), index=0)
     if chatbot_mode == 'Research Xpert 📄':
