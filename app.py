@@ -72,7 +72,7 @@ def init_research_assistant():
 import subprocess
 load_dotenv()
 def run_research_assistant_chatbot():
-    st.title("Research Xpert 🔬")
+    st.title("Research Xpert 📄")
     st.caption('Ask questions about REAL scientific articles')
     st.markdown('Enjoy fully cited responses, Harvard style.')
     st.divider()
@@ -601,8 +601,8 @@ def run_data_analysis_chatbot():
 def main():
     st.sidebar.title("LabXpert")
     # Set 'Research Xpert 🔬' as the default selected option
-    chatbot_mode = st.sidebar.radio("Select an AI Xpert", ('Research Xpert 🔬', 'Data Analysis 📊'), index=0)
-    if chatbot_mode == 'Research Xpert 🔬':
+    chatbot_mode = st.sidebar.radio("Select an AI Xpert", ('Research Xpert 📄', 'Data Analysis 📊'), index=0)
+    if chatbot_mode == 'Research Xpert 📄':
         init_research_assistant()
         run_research_assistant_chatbot()
     elif chatbot_mode == 'Data Analysis 📊':
