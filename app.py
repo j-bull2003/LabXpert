@@ -191,7 +191,6 @@ def run_research_assistant_chatbot():
         st.session_state.messages = load_chat_history()
 
     with st.sidebar:
-        st.image("pic.png")
         if st.button("Delete Chat History"):
             st.session_state.messages = []
             save_chat_history([])
@@ -410,7 +409,6 @@ def run_data_analysis_chatbot():
         
         assistant = client.beta.assistants.retrieve(assistant_id)
         with st.sidebar:
-            st.image("pic.png")
             # assistant_name = st.text_input("Name", value = assistant.name)
             assistant_instructions = "You are a data analyst"
             model_option = 'gpt-3.5-turbo-0125'
@@ -601,9 +599,9 @@ def run_data_analysis_chatbot():
         print(st.session_state.file_ids)
 
 def main():
+    st.sidebar.image("pic.png")
     st.sidebar.title("LabXpert 🧬")
     # Set 'Research Xpert 🔬' as the default selected option
-    st.sidebar.image("pic.png")
     chatbot_mode = st.sidebar.radio("Select an AI Xpert", ('Research Xpert 📄', 'Data Analysis 📊'), index=0)
     if chatbot_mode == 'Research Xpert 📄':
         init_research_assistant()
