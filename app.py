@@ -211,14 +211,14 @@ def run_research_assistant_chatbot():
         embedding_function = CustomOpenAIEmbeddings(openai_api_key=openai_api_key)
         db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
         chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
-        prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt}"
+        prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt} Answer the question directly."
         k = estimate_complexity(prompt)
         results = db.similarity_search_with_relevance_scores(prompt_with_history, k=k)
         with st.spinner("Thinking..."):
             if len(results) == 0 or results[0][1] < 0.85:
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
                 # query the assistant here instead
-                response_text = model.predict("Answer the question directly.", prompt_with_history)      
+                response_text = model.predict(prompt_with_history)      
                 response = f" {response_text}"
                 a = estimate_complexity(prompt)
                 follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=a)
