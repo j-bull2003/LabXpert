@@ -244,9 +244,10 @@ def run_research_assistant_chatbot():
                     combined_input = " ".join(combined_texts)
                     # query_for_llm = f"{combined_input} Answer the question with citation to the paragraphs. For every sentence you write, cite the book name and paragraph number as (author, year). At the end of your commentary, suggest a further question that can be answered by the paragraphs provided."
                     query_for_llm = (
+                        "Answer the question directly."
                         f"Answer the question with citations to each sentence:\n{combined_input}\n\n"
-                        f"Answer this question directly: {prompt}\n\n"
-                        "Please answer the question well, citing relevant sections (author, year) for support."
+                        f"Question: {prompt}\n\n"
+                        "Please answer the question, citing relevant sections (author, year) for support."
                         f"If it is an experimental design question, Suggest a further question/experiment that relates, cite it: {combined_input}"
                     )
                     integrated_response = model.predict(query_for_llm)
