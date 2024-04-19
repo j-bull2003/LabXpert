@@ -76,6 +76,7 @@ def run_research_assistant_chatbot():
     st.caption('Ask questions about REAL scientific articles')
     st.markdown('Enjoy fully cited responses, Harvard style.')
     st.divider()
+    st.audio(format="audio/wav", start_time=0, sample_rate=None, end_time=None, loop=False)
     
 
     # List of files and their GCS paths
