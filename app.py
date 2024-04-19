@@ -600,7 +600,7 @@ def run_data_analysis_chatbot():
 
 def main():
     st.sidebar.image("pic.png")
-    st.caption("Copyright © 2024 LabXpert, Inc. All rights reserved.")
+    st.sidebar.caption("Copyright © 2024 LabXpert, Inc. All rights reserved.")
     st.sidebar.title("LabXpert 🧬")
     # Set 'Research Xpert 🔬' as the default selected option
     chatbot_mode = st.sidebar.radio("Select an AI Xpert", ('Research Xpert 📄', 'Data Xpert 📊'), index=0)
