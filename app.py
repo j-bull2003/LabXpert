@@ -18,7 +18,7 @@ sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 def estimate_complexity(question):
     # List of simpler words
-    simple_words = ['ask', 'know', 'name', 'show', 'list', 'tell', 'define', 'what', 'who', 'where']
+    simple_words = [ 'name', 'show', 'list', 'tell', 'define', 'what', 'who', 'where']
 
     # List of difficult words
     difficult_words = ['design', 'experiment', 'compare', 'contrast', 'details', 'theory', 'research', 'evaluate', 'discuss', 'analyze']
@@ -41,7 +41,7 @@ def estimate_complexity(question):
     elif complexity_score > 0:
         return 5   # Moderate complexity
     else:
-        return 3   # Low complexity
+        return 1   # Low complexity
   
     
 def init_data_analysis():
