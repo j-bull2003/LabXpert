@@ -606,7 +606,7 @@ def main():
     if chatbot_mode == 'Research Xpert 📄':
         init_research_assistant()
         run_research_assistant_chatbot()
-    elif chatbot_mode == 'Data Analysis 📊':
+    elif chatbot_mode == 'Data Xpert 📊':
         init_data_analysis()
         run_data_analysis_chatbot()
 
