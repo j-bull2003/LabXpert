@@ -36,7 +36,7 @@ def estimate_complexity(question):
     complexity_score = difficult_score * 2 - simple_score  # Weight difficult words more
 
     # Decide the complexity level based on the complexity score
-    if complexity_score > 5:
+    if complexity_score > 3:
         return 10  # High complexity
     elif complexity_score > 0:
         return 5   # Moderate complexity
