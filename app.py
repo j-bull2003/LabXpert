@@ -333,7 +333,6 @@ def run_research_assistant_chatbot():
 
 
 
-
 import io
 from openai import OpenAI
 
@@ -601,7 +600,7 @@ def run_data_analysis_chatbot():
 
 def main():
     st.sidebar.title("LabXpert 🧬")
-    st.sidebar.image("pic.png")
+    st.sidebar.image("pic.png", width=200)
     st.sidebar.caption("Copyright © 2024 LabXpert, Inc. All rights reserved.")
     st.sidebar.divider()
     # Set 'Research Xpert 🔬' as the default selected option
