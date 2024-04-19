@@ -218,7 +218,7 @@ def run_research_assistant_chatbot():
             if len(results) == 0 or results[0][1] < 0.85:
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
                 # query the assistant here instead
-                response_text = model.predict(prompt_with_history)      
+                response_text = model.predict("Answer the question directly.", prompt_with_history)      
                 response = f" {response_text}"
                 a = estimate_complexity(prompt)
                 follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=a)
@@ -248,7 +248,7 @@ def run_research_assistant_chatbot():
                         f"Question: {prompt}\n\n"
                         f"Answer the question with citations to each sentence:{combined_input}\n\n"
                         f"Question: {prompt}\n\n"
-                        "Please answer the question directly with a lot of extra detail, citing relevant sections (author, year) for support. Everything that is taken word for word from a source should be in quotation marks."
+                        "Please answer the question directly with a lot of extra detail, citing relevant sections (author, year) for support."
                         f"If it is an experimental design question, Suggest a further question/experiment that relates, and cite it if possible."
                     )
                     integrated_response = model.predict(query_for_llm)
