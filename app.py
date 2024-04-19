@@ -220,7 +220,7 @@ def run_research_assistant_chatbot():
                 # query the assistant here instead
                 response_text = model.predict(prompt_with_history)      
                 response = f" {response_text}"
-                a = estimate_complexity(response_text)
+                a = estimate_complexity(prompt)
                 follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=a)
                 very_strong_correlation_threshold = 0.7
                 high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
