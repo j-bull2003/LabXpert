@@ -575,7 +575,7 @@ def run_data_analysis_chatbot():
 
     def main():
         st.caption('Upload your data file/s and I can produce graphs from your experiment')
-        st.markdown('Your data analyse Xpert!')
+        st.markdown('Your data analysis Xpert!')
         st.divider()
         api_key = set_apikey()
         if api_key:
