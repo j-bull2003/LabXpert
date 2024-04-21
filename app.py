@@ -248,7 +248,7 @@ def run_research_assistant_chatbot():
                         f"Question: {prompt}\n\n"
                         f"Answer the question with citations to each sentence:{combined_input}\n\n"
                         f"Question: {prompt}\n\n"
-                        "Please answer the question directly with a lot of extra detail, show step by step, step 1 2 3 etc.. with nice and pretty formatting, citing relevant sections (author, year) for support."
+                        "Please answer the question directly with a lot of extra detail, show step by step, step 1 2 3 etc.. with nice and pretty formatting and bold headings, citing relevant sections (author, year) for support."
                         f"If the question ({prompt}) has asked you to design an experiment then suggest a further question/experiment that relates, and cite it if possible, if the question didn't ask you to, then don't"
                     )
                     integrated_response = model.predict(query_for_llm)
