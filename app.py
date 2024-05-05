@@ -181,7 +181,9 @@ def run_research_assistant_chatbot():
 
     def load_chat_history():
         with shelve.open("chat_history") as db:
-            return db.get("messages", [])
+            # return db.get("messages", [])
+            return []
+        
 
     def save_chat_history(messages):
         with shelve.open("chat_history") as db:
