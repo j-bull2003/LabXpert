@@ -41,7 +41,7 @@ def estimate_complexity(question):
     elif complexity_score > 0:
         return 5   # Moderate complexity
     else:
-        return 1   # Low complexity
+        return 2   # Low complexity
   
     
 def init_data_analysis():
