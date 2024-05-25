@@ -15,15 +15,21 @@ st.set_page_config(page_icon='🧬', page_title='LabXpert', layout="centered", i
 st.write("<h1 style='text-align: center;'>Welcome to LabXpert</h1>", unsafe_allow_html=True)
 st.write("<div style='text-align: center;'>LabXpert is an AI lab assistant which assists with all stages of the scientific process including hypothesis generation, experimental design, troubleshooting, and data analysis. With a simple chat interface, scientists can easily interact with LabXpert, trained on a wealth of scientific literature, reducing hours of literature searching and data analysis to just a few seconds.</div><br>", unsafe_allow_html=True)
 # url = 'https://www.labxpert.co.uk/'
-url = "https://docs.google.com/forms/d/e/1FAIpQLScFrXl_pc9fG8dx2vTPgj9UUPtDt3vBl-LSj59i1hgDQFrVEA/viewform?usp=sf_link"
+# url = "https://docs.google.com/forms/d/e/1FAIpQLScFrXl_pc9fG8dx2vTPgj9UUPtDt3vBl-LSj59i1hgDQFrVEA/viewform?usp=sf_link"
 
-# Create three columns
-col1, col2, col3, col4, col5 = st.columns([1, 1, 2, 1, 1])
+import streamlit as st
+import webbrowser
+
+url = 'https://www.labxpert.co.uk/'
+
+col1, col2, col3, col4, col5, col6, col7 = st.columns([1, 1, 1, 2, 1, 1, 1])
 
 # Place the button in the middle column
-with col3:
-    if st.button('Leave us some feedback'):
+with col4:
+    if st.button('Learn more here'):
         webbrowser.open_new_tab(url)
+
+
 st.markdown(
     """
     <div style='text-align: center;'>

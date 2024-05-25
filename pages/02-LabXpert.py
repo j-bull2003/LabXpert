@@ -205,9 +205,12 @@ def init_research_assistant():
 
 load_dotenv()
 def run_research_assistant_chatbot():
-    st.title("Research Xpert 📄")
-    st.caption('Ask questions about REAL scientific articles')
-    st.markdown('Enjoy fully cited responses, Harvard style.')
+
+
+    st.markdown("<h1 style='text-align: center;'>Research Xpert 📄</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'><i>Ask questions about REAL scientific articles, with fully cited responses, Harvard style.</i></p>", unsafe_allow_html=True)
+    # st.markdown("<p style='text-align: center;'>Enjoy fully cited responses, Harvard style.</p>", unsafe_allow_html=True)
+
     # st.divider()
 
     
@@ -275,7 +278,7 @@ def run_research_assistant_chatbot():
         citations = ""
         with st.spinner("Thinking..."):
             print(results.matches[0].score)
-            if results.matches and results.matches[0].score > 0.01:
+            if results.matches and results.matches[0].score > 0.0:
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
                 db_response = db.query(vector=[xq], top_k=k, include_metadata=True)
                 sources = {}
@@ -458,7 +461,12 @@ import csv
 import json
 from PIL import Image
 def run_data_analysis_chatbot():
-    st.title("Data Xpert 📊")
+    # st.title("Data Xpert 📊")
+    st.markdown("<h1 style='text-align: center;'>Data Xpert 📊</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'><i>Upload your data file/s and I can produce graphs from your experiment</i></p>", unsafe_allow_html=True)
+    # st.markdown("<p style='text-align: center;'>Your data analysis Xpert!</p>", unsafe_allow_html=True)
+
+
     def init():
         if "messages" not in st.session_state:
             st.session_state.messages = []
@@ -686,8 +694,8 @@ def run_data_analysis_chatbot():
                         st.markdown(content)
 
     def main():
-        st.caption('Upload your data file/s and I can produce graphs from your experiment')
-        st.markdown('Your data analysis Xpert!')
+        # st.caption('Upload your data file/s and I can produce graphs from your experiment')
+        # st.markdown('Your data analysis Xpert!')
         # st.divider()
         api_key = set_apikey()
         if api_key:
@@ -739,9 +747,20 @@ def main():
     #     st.error("Not authenticated")
 
     selected = pills("Choose which Lab Xpert you would like to chat with:", ["Research Xpert", "Data Xpert"], ["📄", "📊"])
+    
+    
+    
+    import webbrowser
+    url = "https://docs.google.com/forms/d/e/1FAIpQLScFrXl_pc9fG8dx2vTPgj9UUPtDt3vBl-LSj59i1hgDQFrVEA/viewform?usp=sf_link"
+
+    # Create three columns
+
+
+
+    if st.button('Leave us some feedback'):
+        webbrowser.open_new_tab(url)
+    
     st.divider()
-    
-    
     
     if selected == 'Research Xpert':
         init_research_assistant()

@@ -16,6 +16,7 @@ streamlit-pills
 st-supabase-connection
 st_login_form
 streamlit_extras
+st_pages
 # pip install pinecone-client --upgrade
 # pip install streamlit-pills
 # pip install psycopg2-binary
