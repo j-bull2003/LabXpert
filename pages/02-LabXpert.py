@@ -806,3 +806,9 @@ if __name__ == '__main__':
             </style>
             """
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+    hide_github_icon = """
+        #GithubIcon {
+        visibility: hidden;
+        }
+        """
+    st.markdown(hide_github_icon, unsafe_allow_html=True)
