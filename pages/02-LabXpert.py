@@ -785,6 +785,12 @@ def main():
     
 
 if __name__ == '__main__':
+
+
+    # Initialize the session state key
+    if 'authenticated' not in st.session_state:
+        st.session_state['authenticated'] = False
+
     
     if st.session_state["authenticated"]:
         main()
