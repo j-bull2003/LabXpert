@@ -1,3 +1,5 @@
+from pathlib import Path
+import pickle
 import zipfile
 import openai
 import time
@@ -10,14 +12,146 @@ from langchain.vectorstores.chroma import Chroma
 from langchain.prompts import ChatPromptTemplate
 from langchain.chat_models import ChatOpenAI
 from datetime import datetime
+import streamlit as st
+# from decouple import config
+from PIL import Image
 
 
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
+
+# st.markdown('## LabXpert')
+# col1, col2 = st.columns((2,1))
+# with col1:
+#     st.markdown(
+#         f"""
+#         #### [Sign Up Now 🤘🏻]('https://buy.stripe.com/test_bIY7vu4Ob2WF9UseUU')
+#         """
+#     )
+# # with col2:
+# #     image = Image.open('./assets/DALL·E 2023-01-08 17.53.04 - futuristic knight robot on a horse in cyberpunk theme.png')
+# #     st.image(image)
+
+
+# st.markdown('### Already have an Account? Login Below👇🏻')
+# with st.form("login_form"):
+#     st.write("Login")
+#     email = st.text_input('Enter Your Email')
+#     password = st.text_input('Enter Your Password')
+#     submitted = st.form_submit_button("Login")
+
+
+# if submitted:
+#     if password == config('SECRET_PASSWORD'):
+#         st.session_state['logged_in'] = True
+#         st.text('Succesfully Logged In!')
+#     else:
+#         st.text('Incorrect, login credentials.')
+#         st.session_state['logged_in'] = False
+
+
+# if 'logged_in' in st.session_state.keys():
+#     if st.session_state['logged_in']:
+#         st.markdown('## Ask Me Anything')
+#         question = st.text_input('Ask your question')
+#         if question != '':
+#             st.write('I drink and I know things.')
+
+# https://buy.stripe.com/test_bIY7vu4Ob2WF9UseUU
+
+# from st_paywall import add_auth
+st.set_page_config(page_icon='🧬', page_title='LabXpert', layout="wide")
+
+
+
+
+
+
+import streamlit as st
+
+# from st_login_form import login_form
+
+
+    
+    
+
+
+
+
+
+
+with st.sidebar:
+    st.sidebar.title("LabXpert ")
+    st.sidebar.caption("Copyright © 2024 LabXpert, Inc. All rights reserved.")
+    
+    # Adding text and formatting to the sidebar
+    st.markdown(
+        """
+        <span style='font-size: 13px; line-height: 0;'>
+            Enhancing the scientific research process with AI:<br>
+            - Trained on a wealth of scientific literature.<br>
+            - Reduces hours of literature searching.<br>
+            - Data analysis to just a few seconds.<br>
+            <br>
+        </span>
+        """,
+        unsafe_allow_html=True
+    )
+
+# add_auth(required=True, login_sidebar=False)
+# login_button_color="#364390"
+# # st.sidebar.write(f'Welcome {st.session_state.email}!')
+# st.sidebar.markdown(
+#     f"""
+#     <span style='font-size: 13px; line-height: 1.2;'>
+#         Welcome {st.session_state.email}!
+#         <br>
+#     </span>
+#     """,
+#     unsafe_allow_html=True
+# )
+
+# st.write("You're all set and subscribed and ready to go! 🎉")
+# import streamlit_authenticator as stauth
+# # --- USER AUTHENTICATION ---
+# names = ["Peter Parker", "Rebecca Miller"]
+# usernames = ["pparker", "rmiller"]
+
+# # load hashed passwords
+# file_path = Path(__file__).parent / "hashed_pw.pkl"
+# with file_path.open("rb") as file:
+#     hashed_passwords = pickle.load(file)
+
+# authenticator = stauth.Authenticate(names, usernames, hashed_passwords,
+#     "sales_dashboard", "abcdef", cookie_expiry_days=30)
+
+# name, authentication_status, username = authenticator.login("Login", "main")
+
+# if authentication_status == False:
+#     st.error("Username/password is incorrect")
+
+# if authentication_status == None:
+#     st.warning("Please enter your username and password")
+
+# if authentication_status:
+    
+# __import__('pysqlite3')
+# import sys
+# sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
+def estimate_relevance(question):
+    # List of simpler word
+    
+    unrelated_words = ['hi', 'hello', 'how are you', 'good morning', 'good evening']
+
+    # Check if the entire question matches any of the unrelated phrases
+    if any(question.strip().lower() == word for word in unrelated_words):
+        return 0  # Return a score of 0 for unrelated words or simple greetings
+
 
 def estimate_complexity(question):
-    # List of simpler words
+    # List of simpler word
+    
+    
     simple_words = [ 'name', 'show', 'list', 'tell', 'define', 'what', 'who', 'where']
 
     # List of difficult words
@@ -37,12 +171,12 @@ def estimate_complexity(question):
 
     # Decide the complexity level based on the complexity score
     if complexity_score > 3:
-        return 10  # High complexity
+        return 5  # High complexity
     elif complexity_score > 0:
         return 5   # Moderate complexity
     else:
-        return 2   # Low complexity
-  
+        return 1   # Low complexity
+
     
 def init_data_analysis():
     if "messages_data_analysis" not in st.session_state:
@@ -69,110 +203,15 @@ def init_research_assistant():
         st.session_state["openai_model"] = "gpt-3.5-turbo"
 
 
-import subprocess
 load_dotenv()
 def run_research_assistant_chatbot():
     st.title("Research Xpert 📄")
     st.caption('Ask questions about REAL scientific articles')
     st.markdown('Enjoy fully cited responses, Harvard style.')
-    st.divider()
-    
-
-    # List of files and their GCS paths
-#     CHROMA = [
-#     "https://storage.googleapis.com/chromaproto/chroma.sqlite3",
-#     "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/data_level0.bin",
-#     "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/header.bin",
-#     "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/index_metadata.pickle",
-#     "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/length.bin",
-#     "https://storage.googleapis.com/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/link_lists.bin",
-# ]
-
-#     def download_files(urls, target_folder):
-#         # Ensure the base target folder exists
-#         os.makedirs(target_folder, exist_ok=True)
-        
-#         # Iterate over each URL
-#         for url in urls:
-#             # Extract the full path segments from the URL
-#             path_segments = url.split('/')[3:]  # This skips the 'https://' part and domain name
-#             subdirectory_path = os.path.join(target_folder, *path_segments[:-1])
-            
-#             # Ensure the target subdirectory exists
-#             os.makedirs(subdirectory_path, exist_ok=True)
-            
-#             # Full path for the file to be saved
-#             file_path = os.path.join(subdirectory_path, path_segments[-1])
-            
-#             # Check if the file already exists
-#             if os.path.exists(file_path):
-#                 print(f'Using cached file {file_path}')
-#             else:
-#                 # Download and save the file if not present
-#                 response = requests.get(url)
-#                 if response.status_code == 200:
-#                     with open(file_path, 'wb') as file:
-#                         file.write(response.content)
-#                     print(f'Downloaded {path_segments[-1]} to {file_path}')
-#                 else:
-#                     print(f'Failed to download {path_segments[-1]} with status code {response.status_code}')
-
-#     # Directory where the files will be saved
-#     target_directory = 'chromaproto'
-
-#     # Call the function to download the files
-#     download_files(CHROMA, target_directory)
-#     CHROMA_PATH = 'chromaproto/chromaproto'
-
-
-
+    # st.divider()
 
     
-    # CHROMA_PATH = "https://storage.googleapis.com/storage/chromaproto/chroma.sqlite3"
-    # "https://storage.googleapis.com/storage/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/data_level0.bin"
-    # "https://storage.googleapis.com/storage/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/header.bin"
-    # "https://storage.googleapis.com/storage/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/index_metadata.pickle"
-    # "https://storage.googleapis.com/storage/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/length.bin"
-    # "https://storage.googleapis.com/storage/chromaproto/6f79f50d-77fa-4352-914d-e3e97df18086/link_lists.bin"
 
-    # https://storage.googleapis.com/storage/chromaproto/chroma.sqlite3
-    # import os
-    # import requests
-    # import zipfile
-    # from io import BytesIO
-
-    # ZIP_URL = 'https://drive.usercontent.google.com/download?id=1iO8NAOULW6nfWwP_kQwVZOUegkerlDig&export=download&authuser=0&confirm=t&uuid=fe14b4e1-2c0b-4d4f-b312-085e19f4eddf&at=APZUnTU63Vu18T0v-kjSfd-jxXy5%3A1713340767172'
-    # CHROMA = 'extracted_folder/'
-
-    # def download_and_extract_zip(url, extract_to):
-    #     if not os.path.exists(extract_to):
-    #         response = requests.get(url, stream=True)
-    #         response.raise_for_status()
-
-    #         with zipfile.ZipFile(BytesIO(response.content), 'r') as zip_ref:
-    #             zip_ref.extractall(extract_to)
-
-    # download_and_extract_zip(ZIP_URL, CHROMA)
-    # CHROMA_PATH = 'extracted_folder/chroma'
-    
-    # Ensure the ZIP is extracted
-    # def ensure_zip_extracted(zip_path, extract_to):
-    #     if not os.path.exists(extract_to):
-    #         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-    #             zip_ref.extractall(extract_to)
-
-    # ensure_zip_extracted(ZIP_FOLDER, CHROMA_PATH)
-    
-
-    PROMPT_TEMPLATE = """
-    Answer the question based only on the following context:
-
-    {context}
-
-    ---
-
-    Answer the question based on the above context: {question}
-    """
 
     if "openai_model" not in st.session_state:
         st.session_state["openai_model"] = "gpt-3.5-turbo"
@@ -207,87 +246,72 @@ def run_research_assistant_chatbot():
         def __call__(self, input):
             return self._embed_documents(input)
     CHROMA_PATH = "chroma"
+    
+    from pinecone import Pinecone, ServerlessSpec
+
+    
+    pc = Pinecone(api_key=st.secrets["PINECONE_API_KEY"])
+
+    if 'pinecone' not in pc.list_indexes().names():
+        pc.create_index(
+            name='pinecone', 
+            dimension=1536, 
+            metric='euclidean',
+            spec=ServerlessSpec(
+                cloud='aws',
+                region='us-west-1'
+            )
+        )
+
     def formulate_response(prompt):
-        citations = ""
         openai_api_key = os.environ["OPENAI_API_KEY"]
-        embedding_function = CustomOpenAIEmbeddings(openai_api_key=openai_api_key)
-        db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
+        db = pc.Index("pinecone")
         chat_history = "\n".join([msg["content"] for msg in st.session_state.messages if msg["role"] == "user"])
         prompt_with_history = f"Previous conversation:\n{chat_history}\n\nYour question: {prompt} Answer the question directly."
-        k = estimate_complexity(prompt)
-        results = db.similarity_search_with_relevance_scores(prompt_with_history, k=k)
+        k = estimate_complexity(prompt)     
+        client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+        xq = client.embeddings.create(input=prompt, model="text-embedding-3-small").data[0].embedding
+        results = db.query(vector=[xq], top_k=k, include_metadata=True)
+        citations = ""
         with st.spinner("Thinking..."):
-            if len(results) == 0 or results[0][1] < 0.85:
+            print(results.matches[0].score)
+            if results.matches and results.matches[0].score > 0.01:
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-                # query the assistant here instead
-                response_text = model.predict(prompt_with_history)      
-                response = f" {response_text}"
-                a = estimate_complexity(prompt)
-                follow_up_results = db.similarity_search_with_relevance_scores(response_text, k=a)
-                very_strong_correlation_threshold = 0.75
-                high_scoring_results = [result for result in follow_up_results if result[1] >= very_strong_correlation_threshold]
-                if high_scoring_results:
-                    sources = []
-                    combined_texts = []
-                    for i, (doc, _score) in enumerate(high_scoring_results):
-                        doc_content = doc.page_content
-                        first_author = doc.metadata['authors'].split(',')[0] if 'authors' in doc.metadata and doc.metadata['authors'] else "Unknown"
-                        citation_key = f"({first_author} et al., {doc.metadata.get('year', 'Unknown')})"
-                        combined_texts.append(f"{doc_content} {citation_key}")
-                        source_info = (
-                            f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
-                            f"({doc.metadata.get('year', 'Unknown')}),\n"
-                            f"\"{doc.metadata['title']}\",\n"
-                            f"PMID: {doc.metadata.get('pub_id', 'N/A')},\n"
-                            f"Available at: {doc.metadata.get('url', 'N/A')},\n"
+                db_response = db.query(vector=[xq], top_k=k, include_metadata=True)
+                sources = {}
+                for match in db_response.matches:
+                    metadata = match.metadata
+                    authors = metadata.get('authors', 'Unknown')
+                    year = metadata.get('year', 'Unknown')
+                    citation_key = f"({authors.split(',')[0]} et al., {year})"
+                    if citation_key not in sources:
+                        sources[citation_key] = (
+                            f"\n🦠 {metadata.get('authors', 'Unknown')}\n"
+                            f"({metadata.get('year', 'Unknown')}),\n"
+                            f"\"{metadata['title']}\",\n"
+                            f"PMID: {metadata.get('pub_id', 'N/A')},\n"
+                            f"Available at: {metadata.get('url', 'N/A')},\n"
                             f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
                         )
-                        sources.append(source_info)
-                    combined_input = " ".join(combined_texts)
-                    # query_for_llm = f"{combined_input} Answer the question with citation to the paragraphs. For every sentence you write, cite the book name and paragraph number as (author, year). At the end of your commentary, suggest a further question that can be answered by the paragraphs provided."
-                    query_for_llm = (
-                        "Answer the question directly."
-                        f"Question: {prompt}\n\n"
-                        f"Answer the question with citations to each sentence:{combined_input}\n\n"
-                        f"Question: {prompt}\n\n"
-                        "Please answer the question directly with a lot of extra detail, show step by step, step 1 2 3 etc.. with nice and pretty formatting and bold headings, citing relevant sections (author, year) for support."
-                        f"If the question ({prompt}) has asked you to design an experiment then suggest a further question/experiment that relates, and cite it if possible, if the question didn't ask you to, then don't"
-                    )
-                    integrated_response = model.predict(query_for_llm)
-                    sources_formatted = "\n".join(sources) 
-                    citations = sources_formatted
-                    
-                    response = f"{integrated_response}\n"
+                citations = "\n".join(sources.values())
+                query_for_llm = (
+                    f"Answer directly with detail: Question: {prompt_with_history}\n\n"
+                    f"Cite each sentence as (author, year) {citations} \n"
+                    "Do NOT list references."
+                )
+                integrated_response = model.predict(query_for_llm)
+                response = f"{integrated_response}\n"
             else:
-                context_texts = []
-                sources = []
-                for doc, _score in results:
-                    source_info = (
-                        f"\n🦠 {doc.metadata.get('authors', 'Unknown')}\n"
-                        f"({doc.metadata.get('year', 'Unknown')}),\n"
-                        f"\"{doc.metadata['title']}\",\n"
-                        f"PMID: {doc.metadata.get('pub_id', 'N/A')},\n"
-                        f"Available at: {doc.metadata.get('url', 'N/A')},\n"
-                        f"Accessed on: {datetime.today().strftime('%Y-%m-%d')}\n"
-                    )
-                    sources.append(source_info)
-                context_text = "\n\n---\n\n".join(context_texts)
-                prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
-                formatted_prompt = prompt_template.format(context=context_text, question=prompt_with_history)
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
-                response_text = model.predict(formatted_prompt)
-                sources_formatted = "\n\n".join(sources)
-                citations = sources_formatted    
-                response = f" {response_text}\n"
-                
-        if citations:
-            st.session_state.messages.append({"role": "assistant", "content": response, "citations": citations})
-        else:
-            st.session_state.messages.append({"role": "assistant", "content": response})
-        
+                response = model.predict(prompt_with_history)
+
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": response,
+            "citations": citations
+        })
+
         display_messages()
-
-
 
     def typewriter(container, text: str, speed: int):
         """Display text with a typewriter effect, preserving newline characters."""
@@ -302,6 +326,63 @@ def run_research_assistant_chatbot():
                 container.markdown(curr_full_text_with_line, unsafe_allow_html=True)
                 time.sleep(1 / speed)
             curr_full_text += f"{line}\n"
+            
+    import openai
+
+    def generate_prompts_experiment(base_prompt):
+
+        openai_api_key = st.secrets["OPENAI_API_KEY"]
+
+        prompt_variations = (
+            "Only return the prompt"
+            f"Using 10 words, come up a concise prompt based on the question about designing an experiment: {base_prompt}"
+
+        )
+        model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+        integrated_response = model.predict(prompt_variations)
+        return integrated_response
+    def generate_prompts_explain(base_prompt):
+
+        openai_api_key = st.secrets["OPENAI_API_KEY"]
+
+        prompt_variations = (
+            "Only return the prompt"
+            f"Using 10 words, come up a concise prompt based on the question about making the concept easier to understand: {base_prompt}"
+
+        )
+        model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+        integrated_response = model.predict(prompt_variations)
+        return integrated_response
+
+    def generate_prompts_previous(base_prompt):
+
+        openai_api_key = st.secrets["OPENAI_API_KEY"]
+
+        prompt_variations = (
+            "Only return the prompt"
+            f"Using 10 words, come up a concise prompt asking about either an experiment done in the past about it, designing an experiment about it, or about outstanding areas of research on that topic, whichever question suits best to follow on with.: {base_prompt}"
+
+        )
+        model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+        integrated_response = model.predict(prompt_variations)
+        return integrated_response
+
+    def generate_prompts_outstanding(base_prompt):
+
+        openai_api_key = st.secrets["OPENAI_API_KEY"]
+
+        prompt_variations = (
+            "Only return the prompt"
+            f"Using 10 words, come up a concise prompt based on the question about outstanding areas of research on that topic: {base_prompt}"
+
+        )
+        model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
+        integrated_response = model.predict(prompt_variations)
+        return integrated_response
+
+
+
+
 
     def display_messages():
         """Function to display all messages in the chat history and show citations for the last response."""
@@ -322,10 +403,39 @@ def run_research_assistant_chatbot():
                 citations_button_label = "Show Citations"
                 with st.expander(citations_button_label):
                     st.markdown(message["citations"], unsafe_allow_html=True)
+                    
+            # with st.container():
+            #     with st.spinner("Generating prompts..."):
+                    # label = generate_prompts_experiment(st.session_state.messages)
+    # label2 = generate_prompts_explain(st.session_state.messages)
+    # label3 = generate_prompts_previous(st.session_state.messages)
+    # label4 = generate_prompts_outstanding(st.session_state.messages)
 
+    # selected_prompt = None
 
+    # col1, col2 = st.columns(2)
+    # with col1:
+    # if st.button(label=label3, key = f"{label3}1"):
+    #     selected_prompt = label3
+    # with col2:
+    #     if st.button(label=label2, key = f"{label3}2"):
+    #         selected_prompt = label2
+
+    # col3, col4 = st.columns(2)
+    # with col3:
+    #     if st.button(label=label3, key = f"{label3}3"):
+    #         selected_prompt = label3
+    # with col4:
+    #     if st.button(label=label4, key = f"{label3}4"):
+    #         selected_prompt = label4
+
+    # if selected_prompt is not None:
+    #     st.session_state.messages.append({"role": "user", "content": selected_prompt})
+    #     formulate_response("selected", selected_prompt)
+
+                    
     user_prompt = st.chat_input("How can I help?")
-
+        
     if user_prompt:
         st.session_state.messages.append({"role": "user", "content": user_prompt})
         formulate_response(user_prompt)
@@ -472,7 +582,7 @@ def run_data_analysis_chatbot():
                 return assistants_dict[assistant_name]
         else:
             st.warning("Assistant name does exist in assistants_dict. Please choose another name.")
-      
+    
     def chat_prompt(client, assistant_option):
         if prompt := st.chat_input("Enter your message here"):
             # Append the user's message to the chat history for later display
@@ -578,7 +688,7 @@ def run_data_analysis_chatbot():
     def main():
         st.caption('Upload your data file/s and I can produce graphs from your experiment')
         st.markdown('Your data analysis Xpert!')
-        st.divider()
+        # st.divider()
         api_key = set_apikey()
         if api_key:
             client = OpenAI(api_key=api_key)
@@ -599,20 +709,67 @@ def run_data_analysis_chatbot():
         init()
         main() 
         print(st.session_state.file_ids)
+        
+
 
 def main():
-    st.sidebar.title("LabXpert 🧬")
-    st.sidebar.image("pic.png")
-    st.sidebar.caption("Copyright © 2024 LabXpert, Inc. All rights reserved.")
+    # st.sidebar.image("pic.png"
     st.sidebar.divider()
     # Set 'Research Xpert 🔬' as the default selected option
-    chatbot_mode = st.sidebar.radio("Select an AI Xpert", ('Research Xpert 📄', 'Data Xpert 📊'), index=0)
-    if chatbot_mode == 'Research Xpert 📄':
+    # tab1, tab2 = st.sidebar.tabs(["Research Xpert", "Data Xpert"])
+
+    # with tab1:
+    #     init_research_assistant()
+    #     run_research_assistant_chatbot()
+
+    # with tab2:
+    #     init_data_analysis()
+    #     run_data_analysis_chatbot()
+    
+    from streamlit_pills import pills
+    
+    # client = login_form()
+
+    # if st.session_state["authenticated"]:
+    #     if st.session_state["username"]:
+    #         st.success(f"Welcome {st.session_state['username']}")
+    #     else:
+    #         st.success("Welcome guest")
+    # else:
+    #     st.error("Not authenticated")
+
+    selected = pills("Choose which Lab Xpert you would like to chat with:", ["Research Xpert", "Data Xpert"], ["📄", "📊"])
+    st.divider()
+    
+    
+    
+    if selected == 'Research Xpert':
         init_research_assistant()
         run_research_assistant_chatbot()
-    elif chatbot_mode == 'Data Xpert 📊':
+    elif selected == 'Data Xpert':
         init_data_analysis()
         run_data_analysis_chatbot()
+        
+        
+        
+        
+    
+    # chatbot_mode = st.sidebar.radio("Select an AI Xpert", ('Research Xpert ', 'Data Xpert '), index=0)
+    # if chatbot_mode == 'Research Xpert ':
+    #     init_research_assistant()
+    #     run_research_assistant_chatbot()
+    # elif chatbot_mode == 'Data Xpert ':
+    #     init_data_analysis()
+    #     run_data_analysis_chatbot()
+
+    
+    
 
 if __name__ == '__main__':
-    main()
+    
+    if st.session_state["authenticated"]:
+        main()
+    elif st.session_state['authenticated'] == False:
+        st.error("Please create an account before using LabXpert")
+        
+        
