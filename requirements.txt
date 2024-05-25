@@ -8,7 +8,6 @@ chromadb
 pysqlite3-binary
 tiktoken
 openai==1.2.2
-pinecone-client==2.0.10
 streamlit-authenticator==0.1.5 
 st-paywall==0.1.8
 python-decouple
