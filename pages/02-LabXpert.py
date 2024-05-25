@@ -252,16 +252,16 @@ def run_research_assistant_chatbot():
     
     pc = Pinecone(api_key=st.secrets["PINECONE_API_KEY"])
 
-    if 'pinecone' not in pc.list_indexes().names():
-        pc.create_index(
-            name='pinecone', 
-            dimension=1536, 
-            metric='euclidean',
-            spec=ServerlessSpec(
-                cloud='aws',
-                region='us-west-1'
-            )
-        )
+    # if 'pinecone' not in pc.list_indexes().names():
+    #     pc.create_index(
+    #         name='pinecone', 
+    #         dimension=1536, 
+    #         metric='euclidean',
+    #         spec=ServerlessSpec(
+    #             cloud='aws',
+    #             region='us-west-1'
+    #         )
+    #     )
 
     def formulate_response(prompt):
         openai_api_key = os.environ["OPENAI_API_KEY"]
