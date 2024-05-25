@@ -756,9 +756,9 @@ def main():
     # Create three columns
 
 
-
-    if st.button('Leave us some feedback'):
-        webbrowser.open_new_tab(url)
+    st.link_button("Leave us some feedback", "https://docs.google.com/forms/d/e/1FAIpQLScFrXl_pc9fG8dx2vTPgj9UUPtDt3vBl-LSj59i1hgDQFrVEA/viewform?usp=sf_link")
+    # if st.button('Leave us some feedback'):
+    #     webbrowser.open_new_tab(url)
     
     st.divider()
     

@@ -26,8 +26,9 @@ col1, col2, col3, col4, col5, col6, col7 = st.columns([1, 1, 1, 2, 1, 1, 1])
 
 # Place the button in the middle column
 with col4:
-    if st.button('Learn more here'):
-        webbrowser.open_new_tab(url)
+    # if st.button('Learn more here'):
+    #     webbrowser.open_new_tab(url)
+    st.link_button("Learn more here", "https://www.labxpert.co.uk/")
 
 
 st.markdown(
