@@ -798,4 +798,13 @@ if __name__ == '__main__':
     elif st.session_state['authenticated'] == False:
         st.error("Please create an account before using LabXpert")
         
-        
+   
+    hide_streamlit_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    </style>
+    """
+
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+    
