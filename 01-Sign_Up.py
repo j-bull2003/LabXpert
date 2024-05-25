@@ -13,7 +13,21 @@ from streamlit_extras.switch_page_button import switch_page
 from st_pages import show_pages_from_config, add_page_title
 st.set_page_config(page_icon='🧬', page_title='LabXpert', layout="centered", initial_sidebar_state="auto")
 st.write("<h1 style='text-align: center;'>Welcome to LabXpert</h1>", unsafe_allow_html=True)
-st.write("<div style='text-align: center;'>LabXpert is an AI lab assistant which assists with all stages of the scientific process including hypothesis generation, experimental design, troubleshooting, and data analysis. With a simple chat interface, scientists can easily interact with LabXpert, trained on a wealth of scientific literature, reducing hours of literature searching and data analysis to just a few seconds.</div><br>", unsafe_allow_html=True)
+# st.write("<div style='text-align: center;'>LabXpert is an AI lab assistant which assists with all stages of the scientific process including hypothesis generation, experimental design, troubleshooting, and data analysis. With a simple chat interface, scientists can easily interact with LabXpert, trained on a wealth of scientific literature, reducing hours of literature searching and data analysis to just a few seconds.</div><br>", unsafe_allow_html=True)
+st.markdown(
+    """
+    <div style='text-align: center;'>
+    <br>
+        LabXpert enhances your experience beyond the capabilities of a standard chat GPT by ensuring 
+        complete data privacy as our models are not trained on your data,
+        accurate and reliable information sourced directly from trusted platforms like PubMed and BioArchive,
+        and efficient research without the need to sift through countless articles.<br>
+        <br>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 # url = 'https://www.labxpert.co.uk/'
 # url = "https://docs.google.com/forms/d/e/1FAIpQLScFrXl_pc9fG8dx2vTPgj9UUPtDt3vBl-LSj59i1hgDQFrVEA/viewform?usp=sf_link"
 
@@ -31,19 +45,6 @@ with col4:
     st.link_button("Learn more here", "https://www.labxpert.co.uk/")
 
 
-st.markdown(
-    """
-    <div style='text-align: center;'>
-    <br>
-        LabXpert enhances your experience beyond the capabilities of a standard chat GPT by ensuring 
-        complete data privacy as our models are not trained on your data,
-        accurate and reliable information sourced directly from trusted platforms like PubMed and BioArchive,
-        and efficient research without the need to sift through countless articles.<br>
-        <br>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
 
 
 # Either this or add_indentation() MUST be called on each page in your
