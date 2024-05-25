@@ -82,7 +82,7 @@ import streamlit as st
 with st.sidebar:
     st.sidebar.title("LabXpert ")
     st.sidebar.caption("Copyright © 2024 LabXpert, Inc. All rights reserved.")
-    st.sidebar.link_button("Leave us some feedback", "https://docs.google.com/forms/d/e/1FAIpQLScFrXl_pc9fG8dx2vTPgj9UUPtDt3vBl-LSj59i1hgDQFrVEA/viewform?usp=sf_link")
+    st.sidebar.link_button(":blue[Leave us some feedback]", "https://docs.google.com/forms/d/e/1FAIpQLScFrXl_pc9fG8dx2vTPgj9UUPtDt3vBl-LSj59i1hgDQFrVEA/viewform?usp=sf_link")
     
     # Adding text and formatting to the sidebar
     st.markdown(
