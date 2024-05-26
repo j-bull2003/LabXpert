@@ -302,7 +302,7 @@ def run_research_assistant_chatbot():
                     f"Answer directly with extra detail: Question: {prompt_with_history}\n\n"
                     f"Cite each sentence with (author, year) in as many sentences as possible, reference all citations. {citations} \n"
                     "Do NOT list references."
-                    "If the question is about designing an experiment, show step-by-step instructions."
+                    f"If the question is about designing an experiment, show step-by-step instructions with immense detail and Cite each sentence with (author, year) in as many sentences as possible, reference all citations. {citations} \n"
                 )
                 integrated_response = model.predict(query_for_llm)
                 response = f"{integrated_response}\n"
@@ -317,6 +317,50 @@ def run_research_assistant_chatbot():
         })
 
         display_messages()
+        
+    def display_messages():
+        # if "messages" not in st.session_state:
+        #     st.session_state.messages = []
+
+        total_messages = len(st.session_state.messages)
+
+        for index, message in enumerate(st.session_state.messages):
+            avatar = "🧬" if message["role"] == "user" else "🤖"
+            text = f"{avatar} {message['content']}"
+
+            if message["role"] == "user":
+                st.markdown(text, unsafe_allow_html=True)
+            else:
+                container = st.empty()
+                if index == total_messages - 1:
+                    typewriter(container, text, speed=50)
+                else:
+                    container.markdown(text, unsafe_allow_html=True)
+
+            if "citations" in message and message["citations"]:
+                
+                with st.expander("Show Citations"):
+                    st.markdown(message["citations"], unsafe_allow_html=True)
+
+                
+                # st.download_button(
+                #     label="Download PDF with Response and Citations 📋 ",
+                #     data=create_pdf(message.get('content', ''), message.get('citations', '')),
+                #     file_name="response_citations.pdf",
+                #     mime="application/pdf",
+                #     key=message.get('content', ''),
+                # )
+ 
+                # with st.container():
+                #     with st.spinner("Generating prompt..."):
+                #         label = generate_prompts_experiment(st.session_state.messages)
+                #         selected_prompt = None
+                #         if st.button(label= label + " ⏭️ ", key = f"{label}1{st.session_state.messages}"):
+                #             selected_prompt = label
+                            
+                #         if selected_prompt is not None:
+                #             st.session_state.messages.append({"role": "user", "content": selected_prompt})
+                #             formulate_response("selected", selected_prompt)
 
     def typewriter(container, text: str, speed: int):
         """Display text with a typewriter effect, preserving newline characters."""
@@ -340,7 +384,7 @@ def run_research_assistant_chatbot():
 
         prompt_variations = (
             "Only return the prompt"
-            f"Using 10 words, come up a concise prompt based on the question about designing an experiment: {base_prompt}"
+            f"Using 10 words, print a concise prompt based on the question: {base_prompt}"
 
         )
         model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
@@ -386,59 +430,70 @@ def run_research_assistant_chatbot():
         return integrated_response
 
 
+    from fpdf import FPDF
+    import base64
+    import re
 
 
+    def remove_unsupported_characters(text):
+        """Remove characters that cannot be encoded in 'latin-1'."""
+        return re.sub(r'[^\x00-\xFF]', '', text)
 
-    def display_messages():
-        """Function to display all messages in the chat history and show citations for the last response."""
-        total_messages = len(st.session_state.messages)
-        for index, message in enumerate(st.session_state.messages):
-            avatar = "🧬" if message["role"] == "user" else "🤖"
-            text = f"{avatar} {message['content']}"
+    def create_pdf(response, citations):
+        """Create a PDF file with the response and citations."""
+        response = remove_unsupported_characters(response)
+        citations = remove_unsupported_characters(citations)
+        
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        
+        pdf.multi_cell(0, 10, f"Response:\n{response}")
+        pdf.ln(10)
+        pdf.multi_cell(0, 10, f"Citations:\n{citations}")
+        
+        return pdf.output(dest="S").encode("latin1")
+
+    # def display_messages():
+    #     """Function to display all messages in the chat history and show citations for the last response."""
+    #     total_messages = len(st.session_state.messages)
+        
+    #     for index, message in enumerate(st.session_state.messages):
+    #         avatar = "🧬" if message["role"] == "user" else "🤖"
+    #         text = f"{avatar} {message['content']}"
             
-            if message["role"] == "user":
-                st.markdown(text, unsafe_allow_html=True)
-            else:
-                container = st.empty()
-                if index == total_messages - 1:
-                    typewriter(container, text, speed=50)
-                else:
-                    container.markdown(text, unsafe_allow_html=True)
-            if "citations" in message and message["citations"]:
-                citations_button_label = "Show Citations"
-                with st.expander(citations_button_label):
-                    st.markdown(message["citations"], unsafe_allow_html=True)
+    #         if message["role"] == "user":
+    #             st.markdown(text, unsafe_allow_html=True)
+    #         else:
+    #             container = st.empty()
+    #             if index == total_messages - 1:
+    #                 typewriter(container, text, speed=50)
+    #             else:
+    #                 container.markdown(text, unsafe_allow_html=True)
+            
+    #         if "citations" in message and message["citations"]:
+    #             citations_button_label = "Show Citations"
+    #             with st.expander(citations_button_label):
+    #                 st.markdown(message["citations"], unsafe_allow_html=True)
                     
-            # with st.container():
-            #     with st.spinner("Generating prompts..."):
-                    # label = generate_prompts_experiment(st.session_state.messages)
-    # label2 = generate_prompts_explain(st.session_state.messages)
-    # label3 = generate_prompts_previous(st.session_state.messages)
-    # label4 = generate_prompts_outstanding(st.session_state.messages)
+    #             # Prepare the content for download
+    #             response_content = message['content']
+    #             citations_content = message['citations']
+                
+    #             # Create the PDF content
+    #             pdf_content = create_pdf(response_content, citations_content)
+                
+    #             # Add a download button for the PDF
+    #             st.download_button(
+    #                 label="Download Response and Citations as PDF",
+    #                 data=pdf_content,
+    #                 file_name="response_and_citations.pdf",
+    #                 mime="application/pdf"
+    #             )
 
-    # selected_prompt = None
 
-    # col1, col2 = st.columns(2)
-    # with col1:
-    # if st.button(label=label3, key = f"{label3}1"):
-    #     selected_prompt = label3
-    # with col2:
-    #     if st.button(label=label2, key = f"{label3}2"):
-    #         selected_prompt = label2
 
-    # col3, col4 = st.columns(2)
-    # with col3:
-    #     if st.button(label=label3, key = f"{label3}3"):
-    #         selected_prompt = label3
-    # with col4:
-    #     if st.button(label=label4, key = f"{label3}4"):
-    #         selected_prompt = label4
-
-    # if selected_prompt is not None:
-    #     st.session_state.messages.append({"role": "user", "content": selected_prompt})
-    #     formulate_response("selected", selected_prompt)
-
-                    
+                                    
     user_prompt = st.chat_input("How can I help?")
         
     if user_prompt:

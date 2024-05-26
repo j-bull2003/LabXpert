@@ -17,36 +17,36 @@ st.write("<h1 style='text-align: center;'>Welcome to LabXpert</h1>", unsafe_allo
 
 
 
-import base64
+# import base64
 
-def get_img_as_base64(file):
-    with open(file, "rb") as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
-img = get_img_as_base64("image.png")
+# def get_img_as_base64(file):
+#     with open(file, "rb") as f:
+#         data = f.read()
+#     return base64.b64encode(data).decode()
+# img = get_img_as_base64("image.png")
 
-page_bg_img = f"""
-<style>
-[data-testid="stAppViewContainer"] > .main {{
-    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), 
-                url("data:image/png;base64,{img}");
-    background-size: 99%;
-    background-position: top left;
-    background-repeat: no-repeat;
-    background-attachment: local;
-}}
+# page_bg_img = f"""
+# <style>
+# [data-testid="stAppViewContainer"] > .main {{
+#     background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), 
+#                 url("data:image/png;base64,{img}");
+#     background-size: 99%;
+#     background-position: top left;
+#     background-repeat: no-repeat;
+#     background-attachment: local;
+# }}
 
-[data-testid="stHeader"] {{
-    background: rgba(0,0,0,0);
-}}
+# [data-testid="stHeader"] {{
+#     background: rgba(0,0,0,0);
+# }}
 
-[data-testid="stToolbar"] {{
-    right: 2rem;
-}}
-</style>
-"""
+# [data-testid="stToolbar"] {{
+#     right: 2rem;
+# }}
+# </style>
+# """
 
-st.markdown(page_bg_img, unsafe_allow_html=True)
+# st.markdown(page_bg_img, unsafe_allow_html=True)
 
 
 
