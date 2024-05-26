@@ -279,7 +279,7 @@ def run_research_assistant_chatbot():
         citations = ""
         with st.spinner("Thinking..."):
             print(results.matches[0].score)
-            if results.matches and results.matches[0].score > 0.0:
+            if results.matches and results.matches[0].score > 0.007:
                 model = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-0125")
                 db_response = db.query(vector=[xq], top_k=k, include_metadata=True)
                 sources = {}
@@ -299,9 +299,10 @@ def run_research_assistant_chatbot():
                         )
                 citations = "\n".join(sources.values())
                 query_for_llm = (
-                    f"Answer directly with detail: Question: {prompt_with_history}\n\n"
-                    f"Cite each sentence as (author, year) {citations} \n"
+                    f"Answer directly with extra detail: Question: {prompt_with_history}\n\n"
+                    f"Cite each sentence with (author, year) in as many sentences as possible, reference all citations. {citations} \n"
                     "Do NOT list references."
+                    "If the question is about designing an experiment, show step-by-step instructions."
                 )
                 integrated_response = model.predict(query_for_llm)
                 response = f"{integrated_response}\n"

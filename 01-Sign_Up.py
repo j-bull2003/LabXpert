@@ -68,9 +68,10 @@ def hide_pages(pages_to_hide):
 if st.session_state["authenticated"]:
     if st.session_state["username"]:
         st.success(f"Welcome {st.session_state['username']}")
+        # st.link_button("Go", "./LabXpert")
     else:
         st.success("Welcome guest")
-        switch_page('labxpert')
+        switch_page('LabXpert')
 else:
     st.error("Not authenticated")
  
