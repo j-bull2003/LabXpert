@@ -17,6 +17,7 @@ st_login_form
 streamlit_extras
 st_pages
 pinecone-client==4.1.0
+fpdf
 # pip install pinecone-client --upgrade
 # pip install streamlit-pills
 # pip install psycopg2-binary
