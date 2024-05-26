@@ -1,7 +1,7 @@
 import streamlit as st
 # from utils.auth import create_account_st_form
 # from streamlit_extras.switch_page_button import switch_page
-
+# https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcQ-lODtKMmdRefE1cTUwOH_0AR5qNyJKDvsUqIsOhcvFBJVfyVX 
 # st.set_page_config(page_title='Streamlit x Flask x Stripe Example', page_icon='🌶️', initial_sidebar_state="auto", menu_items=None)
 
 # if create_account_st_form():
@@ -14,6 +14,46 @@ from st_pages import show_pages_from_config, add_page_title
 st.set_page_config(page_icon='🧬', page_title='LabXpert', layout="centered", initial_sidebar_state="auto")
 st.write("<h1 style='text-align: center;'>Welcome to LabXpert</h1>", unsafe_allow_html=True)
 # st.write("<div style='text-align: center;'>LabXpert is an AI lab assistant which assists with all stages of the scientific process including hypothesis generation, experimental design, troubleshooting, and data analysis. With a simple chat interface, scientists can easily interact with LabXpert, trained on a wealth of scientific literature, reducing hours of literature searching and data analysis to just a few seconds.</div><br>", unsafe_allow_html=True)
+
+
+
+import base64
+
+def get_img_as_base64(file):
+    with open(file, "rb") as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+img = get_img_as_base64("image.png")
+
+page_bg_img = f"""
+<style>
+[data-testid="stAppViewContainer"] > .main {{
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), 
+                url("data:image/png;base64,{img}");
+    background-size: 99%;
+    background-position: top left;
+    background-repeat: no-repeat;
+    background-attachment: local;
+}}
+
+[data-testid="stHeader"] {{
+    background: rgba(0,0,0,0);
+}}
+
+[data-testid="stToolbar"] {{
+    right: 2rem;
+}}
+</style>
+"""
+
+st.markdown(page_bg_img, unsafe_allow_html=True)
+
+
+
+
+
+
+
 st.markdown(
     """
     <div style='text-align: center;'>
@@ -115,3 +155,14 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+page_bg_img = '''
+<style>
+body {
+background-image: url("https://images.unsplash.com/photo-1542281286-9e0a16bb7366");
+background-size: cover;
+}
+</style>
+'''
+
+st.markdown(page_bg_img, unsafe_allow_html=True)
