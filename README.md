@@ -25,6 +25,6 @@ Using pinecone as cloud storgae, I could save my db with a cosine embedding and 
 You can also checkout my simple website to learn more about this personal project: https://www.labxpert.co.uk/
 
 Watch a video demo here:
-[![Watch the video](http://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg)](https://youtu.be/Ktu75kw13Yk)
+[![Watch the video](./lab-image.png)](https://youtu.be/Ktu75kw13Yk)
 
 [Download and watch the video](./sample-video.mov)
