@@ -1,0 +1,8 @@
+[[pages]]
+path = "pages/01-Sign_Up.py"
+name = "Sign Up"
+
+[[pages]]
+path = "pages/02-LabXpert.py"
+name = "LabXpert"
+

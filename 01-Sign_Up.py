@@ -93,7 +93,7 @@ with col4:
 
 # show_pages_from_config()
 
-client = login_form(create_title="Create a new account", login_title="Login to existing account", allow_guest=False)
+client = login_form(create_title="Create a new account", login_title="Login to existing account")
 # add_page_title()
 
 # show_pages_from_config()
