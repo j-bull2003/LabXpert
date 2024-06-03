@@ -6,6 +6,11 @@ Checkout the `website` branch to see the latest version of project that is deplo
 
 # https://labxpert.streamlit.app/
 
+Click the image to watch a video demo:
+
+[![Watch the video](./lab-image.png)](https://youtu.be/Ktu75kw13Yk)
+
+
 On the `main` branch I use a local chroma database along with the embeddings model, but the issue I faced is that because I needed to push my code to github for the deployment process, as a rule of thumb, github is not for storage! I wanted to make the database as big as possible to give the RAG model as much scientific information asd possible to reduce risk of hallucination.
 
 I tried various methods which you can checkout on multiple branches of storing the vector database, such as:
@@ -24,7 +29,3 @@ Using pinecone as cloud storgae, I could save my db with a cosine embedding and 
 
 You can also checkout my simple website to learn more about this personal project: https://www.labxpert.co.uk/
 
-Watch a video demo here:
-[![Watch the video](./lab-image.png)](https://youtu.be/Ktu75kw13Yk)
-
-[Download and watch the video](./sample-video.mov)
