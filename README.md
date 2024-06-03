@@ -2,7 +2,7 @@
 
 I've created an AI chatbot that uses a combination of the openai llm, the openai embedding model and a pinecone vector db storage to create a RAG ML pipeline to create an AI Lab assitant that can cite all it's sources using Harvard referencing system from sources like pubmed and bioarchive. 
 
-Checkout the `sheroku` branch to see the latest version of project that is deployed live here:
+Checkout the `website` branch to see the latest version of project that is deployed live here:
 
 # https://labxpert.streamlit.app/
 
@@ -25,5 +25,6 @@ Using pinecone as cloud storgae, I could save my db with a cosine embedding and 
 You can also checkout my simple website to learn more about this personal project: https://www.labxpert.co.uk/
 
 Watch a video demo here:
+[![Watch the video](http://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg)](https://youtu.be/Ktu75kw13Yk)
 
 [Download and watch the video](./sample-video.mov)
